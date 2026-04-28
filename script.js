@@ -59,7 +59,7 @@ document.getElementById('generate-btn').addEventListener('click', async () => {
     btn.innerText = "L'IA travaille... ⏳";
     
     try {
-        const response = await fetch('revis-ia-five.vercel.app', {
+        const response = await fetch('https://revis-ia-back.onrender.com', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ cours: currentText }) // On envoie le texte actuel
