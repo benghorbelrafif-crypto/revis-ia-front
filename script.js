@@ -93,30 +93,34 @@ document.getElementById('generate-btn').addEventListener('click', async () => {
             });
         }
 
-        // 3. AFFICHAGE DU QUIZ
-        quizContainer.innerHTML = "";
-        if (data.quiz) {
-            data.quiz.forEach((q, index) => {
-                const div = document.createElement('div');
-                div.className = "card";
-                div.style.marginBottom = "15px";
-                
-                let optionsHTML = q.options.map(opt => 
-                    `<button onclick="verifier(this, '${q.reponse_correcte.replace(/'/g, "\\'")}')" 
-                             style="display:block; width:100%; margin:5px 0; padding:10px; cursor:pointer; background:white; border:1px solid #ccc; border-radius:5px;">
-                        ${opt}
-                    </button>`
-                ).join("");
-                
-                div.innerHTML = `
-                    <p><strong>${index + 1}. ${q.question}</strong></p>
-                    ${optionsHTML}
-                    <p class="res" style="display:none; font-weight:bold; margin-top:10px;"></p>
-                `;
-                quizContainer.appendChild(div);
-            });
-        }
+        // 3. QUIZ (Version ultra-robuste contre les nombres)
+        quizContainer.innerHTML = "";
+        if (data.quiz) {
+            data.quiz.forEach((q, index) => {
+                const div = document.createElement('div');
+                div.style.marginBottom = "20px";
+                div.style.padding = "15px";
+                div.style.border = "1px solid #eee";
+                div.style.borderRadius = "8px";
 
+                // On transforme la réponse en String pour éviter le bug .replace()
+                const reponsePropre = String(q.reponse_correcte).replace(/'/g, "\\'");
+
+                let optionsHTML = q.options.map(opt => 
+                    `<button onclick="verifier(this, '${reponsePropre}')" 
+                             style="display:block; width:100%; margin:5px 0; padding:10px; cursor:pointer; background:white; border:1px solid #ccc; border-radius:5px; text-align:left;">
+                        ${opt}
+                    </button>`
+                ).join("");
+                
+                div.innerHTML = `
+                    <p><strong>${index + 1}. ${q.question}</strong></p>
+                    ${optionsHTML}
+                    <p class="res" style="display:none; font-weight:bold; margin-top:10px;"></p>
+                `;
+                quizContainer.appendChild(div);
+            });
+        }
     } catch (e) {
         console.error(e);
         alert("Erreur de connexion avec l'IA.");
