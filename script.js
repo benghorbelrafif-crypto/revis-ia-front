@@ -67,17 +67,15 @@ generateBtn.addEventListener('click', () => {
         return;
     }
 
-    // RESET
     summaryDisplay.innerHTML = "⏳ Génération...";
     flashcardsContainer.innerHTML = "";
     quizContainer.innerHTML = "";
 
-    // SIMULATION IA
     setTimeout(() => {
         generateSummary(text);
         generateFlashcards(text);
         generateQuiz(text);
-    }, 1000);
+    }, 800);
 });
 
 // ===============================
@@ -91,7 +89,7 @@ function generateSummary(text) {
 }
 
 // ===============================
-// PARTIE 5 : FLASHCARDS
+// PARTIE 5 : FLASHCARDS (FIXÉ)
 // ===============================
 function generateFlashcards(text) {
     const sentences = text
@@ -111,13 +109,13 @@ function generateFlashcards(text) {
         card.innerHTML = `
             <div class="flashcard-inner">
 
-                <!-- RECTO (QUESTION) -->
+                <!-- RECTO -->
                 <div class="flashcard-front">
                     <p>🧠 Question</p>
                     <strong>${question}</strong>
                 </div>
 
-                <!-- VERSO (RÉPONSE + QUESTION) -->
+                <!-- VERSO -->
                 <div class="flashcard-back">
                     <p>📘 Réponse</p>
 
@@ -135,15 +133,7 @@ function generateFlashcards(text) {
             </div>
         `;
 
-        card.addEventListener("click", () => {
-            card.classList.toggle("flipped");
-        });
-
-        flashcardsContainer.appendChild(card);
-    });
-}
-
-        // INTERACTIVITÉ (flip)
+        // flip
         card.addEventListener("click", () => {
             card.classList.toggle("flipped");
         });
