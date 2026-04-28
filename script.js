@@ -94,23 +94,40 @@ function generateSummary(text) {
 // PARTIE 5 : FLASHCARDS
 // ===============================
 function generateFlashcards(text) {
-    const sentences = text.split(".").filter(s => s.trim().length > 20);
+    const sentences = text
+        .split(".")
+        .filter(s => s.trim().length > 20);
 
-    sentences.slice(0, 5).forEach((sentence, index) => {
+    flashcardsContainer.innerHTML = "";
+
+    sentences.slice(0, 6).forEach((sentence, index) => {
+
+        // On fabrique une "question" simple à partir de la phrase
+        const question = "Explique cette idée :";
+        const answer = sentence.trim();
+
         const card = document.createElement("div");
         card.className = "flashcard";
 
         card.innerHTML = `
             <div class="flashcard-inner">
+                
+                <!-- RECTO -->
                 <div class="flashcard-front">
-                    Question ${index + 1}
+                    <p>🧠 Question ${index + 1}</p>
+                    <strong>${question}</strong>
                 </div>
+
+                <!-- VERSO -->
                 <div class="flashcard-back">
-                    ${sentence}
+                    <p>📘 Réponse</p>
+                    <span>${answer}</span>
                 </div>
+
             </div>
         `;
 
+        // INTERACTIVITÉ (flip)
         card.addEventListener("click", () => {
             card.classList.toggle("flipped");
         });
