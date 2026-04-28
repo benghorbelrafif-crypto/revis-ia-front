@@ -45,7 +45,6 @@ document.getElementById('generate-btn').addEventListener('click', async () => {
 
     const summaryDisplay = document.getElementById('summary-display');
     const flashcardsContainer = document.getElementById('flashcards-container');
-    const quizContainer = document.getElementById('quiz-container');
     const btn = document.getElementById('generate-btn');
 
     if (!currentText || currentText.trim().length < 5) {
@@ -65,8 +64,7 @@ document.getElementById('generate-btn').addEventListener('click', async () => {
         if (!response.ok) throw new Error("Serveur KO");
 
         const data = await response.json();
-
-        console.log("DATA IA :", data); // DEBUG IMPORTANT
+        console.log("DATA IA :", data);
 
         // =========================
         // 1. RÉSUMÉ
@@ -84,7 +82,7 @@ document.getElementById('generate-btn').addEventListener('click', async () => {
         }
 
         // =========================
-        // 2. FLASHCARDS (INTERACTIVES)
+        // 2. FLASHCARDS
         // =========================
         flashcardsContainer.innerHTML = "";
         flashcardsContainer.classList.add("flashcards-grid");
@@ -115,34 +113,10 @@ document.getElementById('generate-btn').addEventListener('click', async () => {
         }
 
         // =========================
-        // 3. QUIZ
+        // 3. QUIZ (NOUVEAU MODE APP)
         // =========================
-        quizContainer.innerHTML = "";
-
         if (Array.isArray(data.quiz)) {
-            data.quiz.forEach((q, index) => {
-
-                const div = document.createElement('div');
-                div.classList.add("quiz-item");
-
-                const correct = String(q.reponse_correcte ?? "").trim();
-
-                const optionsHTML = (q.options || []).map(opt => `
-                    <button onclick="verifier(this, '${correct.replace(/'/g, "\\'")}')">
-                        ${opt}
-                    </button>
-                `).join("");
-
-                div.innerHTML = `
-                    <p><strong>${index + 1}. ${q.question || "Question ?"}</strong></p>
-                    <div class="quiz-options">
-                        ${optionsHTML}
-                    </div>
-                    <p class="res" style="display:none; font-weight:bold;"></p>
-                `;
-
-                quizContainer.appendChild(div);
-            });
+            renderQuiz(data.quiz);
         }
 
     } catch (error) {
@@ -155,23 +129,61 @@ document.getElementById('generate-btn').addEventListener('click', async () => {
 });
 
 
-// --- PARTIE 3 : VÉRIFICATION QUIZ ---
-function verifier(btn, correct) {
+// --- PARTIE 3 : QUIZ INTERACTIF ---
+function renderQuiz(quiz) {
+    const container = document.getElementById('quiz-container');
+    container.innerHTML = "";
 
-    const parent = btn.parentElement.parentElement;
-    const res = parent.querySelector('.res');
+    let current = 0;
 
-    res.style.display = "block";
+    function showQuestion() {
+        const q = quiz[current];
 
-    const userAnswer = btn.innerText.trim();
+        const correct = String(q.reponse_correcte ?? "").trim();
 
-    if (userAnswer === correct) {
-        res.innerText = "✅ Correct !";
-        res.classList.add("correct");
-    } else {
-        res.innerText = "❌ Faux. Réponse : " + correct;
-        res.classList.add("wrong");
+        container.innerHTML = `
+            <div class="quiz-card">
+                <h3>${q.question}</h3>
+                <div class="options">
+                    ${(q.options || []).map(opt => `
+                        <button class="opt">${opt}</button>
+                    `).join("")}
+                </div>
+                <div class="feedback"></div>
+            </div>
+        `;
+
+        document.querySelectorAll('.opt').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const feedback = document.querySelector('.feedback');
+
+                if (btn.innerText.trim() === correct) {
+                    btn.classList.add("correct");
+                    feedback.innerHTML = "✅ Bonne réponse";
+                } else {
+                    btn.classList.add("wrong");
+                    feedback.innerHTML = `❌ Mauvais. Réponse : ${correct}`;
+                }
+
+                document.querySelectorAll('.opt').forEach(b => b.disabled = true);
+
+                const next = document.createElement('button');
+                next.innerText = "Continuer";
+                next.className = "next-btn";
+
+                next.onclick = () => {
+                    current++;
+                    if (current < quiz.length) {
+                        showQuestion();
+                    } else {
+                        container.innerHTML = "<h2>🎉 Quiz terminé !</h2>";
+                    }
+                };
+
+                container.appendChild(next);
+            });
+        });
     }
 
-    parent.querySelectorAll('button').forEach(b => b.disabled = true);
+    showQuestion();
 }
