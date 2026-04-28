@@ -96,12 +96,19 @@ function generateFlashcards(text) {
         .split(".")
         .filter(s => s.trim().length > 20);
 
+    function generateFlashcards(text) {
+    const sentences = text
+        .split(".")
+        .map(s => s.trim())
+        .filter(s => s.length > 30);
+
     flashcardsContainer.innerHTML = "";
 
     sentences.slice(0, 6).forEach((sentence) => {
 
-        const question = "Explique cette idée :";
-        const answer = sentence.trim();
+        // 🔥 transformation simple en "question"
+        const question = transformToQuestion(sentence);
+        const answer = sentence;
 
         const card = document.createElement("div");
         card.className = "flashcard";
@@ -122,6 +129,24 @@ function generateFlashcards(text) {
                     <div class="back-question">
                         ❓ ${question}
                     </div>
+
+                    <hr>
+
+                    <div class="back-answer">
+                        ${answer}
+                    </div>
+                </div>
+
+            </div>
+        `;
+
+        card.addEventListener("click", () => {
+            card.classList.toggle("flipped");
+        });
+
+        flashcardsContainer.appendChild(card);
+    });
+}
 
                     <hr>
 
