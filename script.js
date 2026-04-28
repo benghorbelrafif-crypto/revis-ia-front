@@ -45,6 +45,7 @@ document.getElementById('generate-btn').addEventListener('click', async () => {
 
     const summaryDisplay = document.getElementById('summary-display');
     const flashcardsContainer = document.getElementById('flashcards-container');
+    const quizContainer = document.getElementById('quiz-container');
     const btn = document.getElementById('generate-btn');
 
     if (!currentText || currentText.trim().length < 5) {
@@ -64,7 +65,8 @@ document.getElementById('generate-btn').addEventListener('click', async () => {
         if (!response.ok) throw new Error("Serveur KO");
 
         const data = await response.json();
-        console.log("DATA IA :", data);
+
+        console.log("DATA IA :", data); // DEBUG IMPORTANT
 
         // =========================
         // 1. RÉSUMÉ
@@ -82,7 +84,7 @@ document.getElementById('generate-btn').addEventListener('click', async () => {
         }
 
         // =========================
-        // 2. FLASHCARDS
+        // 2. FLASHCARDS (INTERACTIVES)
         // =========================
         flashcardsContainer.innerHTML = "";
         flashcardsContainer.classList.add("flashcards-grid");
@@ -113,10 +115,34 @@ document.getElementById('generate-btn').addEventListener('click', async () => {
         }
 
         // =========================
-        // 3. QUIZ (NOUVEAU MODE APP)
+        // 3. QUIZ
         // =========================
+        quizContainer.innerHTML = "";
+
         if (Array.isArray(data.quiz)) {
-            renderQuiz(data.quiz);
+            data.quiz.forEach((q, index) => {
+
+                const div = document.createElement('div');
+                div.classList.add("quiz-item");
+
+                const correct = String(q.reponse_correcte ?? "").trim();
+
+                const optionsHTML = (q.options || []).map(opt => `
+                    <button onclick="verifier(this, '${correct.replace(/'/g, "\\'")}')">
+                        ${opt}
+                    </button>
+                `).join("");
+
+                div.innerHTML = `
+                    <p><strong>${index + 1}. ${q.question || "Question ?"}</strong></p>
+                    <div class="quiz-options">
+                        ${optionsHTML}
+                    </div>
+                    <p class="res" style="display:none; font-weight:bold;"></p>
+                `;
+
+                quizContainer.appendChild(div);
+            });
         }
 
     } catch (error) {
@@ -129,81 +155,23 @@ document.getElementById('generate-btn').addEventListener('click', async () => {
 });
 
 
-// --- PARTIE 3 : QUIZ INTERACTIF ---
-function renderQuiz(quiz) {
-    const container = document.getElementById('quiz-container');
-    container.innerHTML = "";
+// --- PARTIE 3 : VÉRIFICATION QUIZ ---
+function verifier(btn, correct) {
 
-    let current = 0;
+    const parent = btn.parentElement.parentElement;
+    const res = parent.querySelector('.res');
 
-    function showQuestion() {
-        const q = quiz[current];
+    res.style.display = "block";
 
-        const correct = String(q.reponse_correcte ?? "").trim();
+    const userAnswer = btn.innerText.trim();
 
-        container.innerHTML = `
-            <div class="quiz-card">
-                <h3>${q.question}</h3>
-                <div class="options">
-                    ${(q.options || []).map(opt => `
-                        <button class="opt">${opt}</button>
-                    `).join("")}
-                </div>
-                <div class="feedback"></div>
-            </div>
-        `;
-
-        document.querySelectorAll('.opt').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const feedback = document.querySelector('.feedback');
-
-                if (btn.innerText.trim() === correct) {
-                    btn.classList.add("correct");
-                    feedback.innerHTML = "✅ Bonne réponse";
-                } else {
-                    btn.classList.add("wrong");
-                    feedback.innerHTML = `❌ Mauvais. Réponse : ${correct}`;
-                }
-
-                document.querySelectorAll('.opt').forEach(b => b.disabled = true);
-
-                const next = document.createElement('button');
-                next.innerText = "Continuer";
-                next.className = "next-btn";
-
-                next.onclick = () => {
-                    current++;
-                    if (current < quiz.length) {
-                        showQuestion();
-                    } else {
-                        container.innerHTML = "<h2>🎉 Quiz terminé !</h2>";
-                    }
-                };
-
-                container.appendChild(next);
-            });
-        });
+    if (userAnswer === correct) {
+        res.innerText = "✅ Correct !";
+        res.classList.add("correct");
+    } else {
+        res.innerText = "❌ Faux. Réponse : " + correct;
+        res.classList.add("wrong");
     }
 
-    showQuestion();
+    parent.querySelectorAll('button').forEach(b => b.disabled = true);
 }
-
-// ==========================================
-// --- PARTIE 4 : LOGIQUE DES ONGLETS (TABS) ---
-// ==========================================
-document.querySelectorAll('.tab-btn').forEach(button => {
-    button.addEventListener('click', () => {
-        const tabName = button.getAttribute('data-tab');
-
-        // 1. Désactiver tous les boutons et contenus
-        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-        document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-
-        // 2. Activer le bon bouton et le bon contenu
-        button.classList.add('active');
-        const targetTab = document.getElementById(`${tabName}-tab`);
-        if (targetTab) {
-            targetTab.classList.add('active');
-        }
-    });
-});
