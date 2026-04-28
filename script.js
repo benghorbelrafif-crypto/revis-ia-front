@@ -100,9 +100,8 @@ function generateFlashcards(text) {
 
     flashcardsContainer.innerHTML = "";
 
-    sentences.slice(0, 6).forEach((sentence, index) => {
+    sentences.slice(0, 6).forEach((sentence) => {
 
-        // On fabrique une "question" simple à partir de la phrase
         const question = "Explique cette idée :";
         const answer = sentence.trim();
 
@@ -111,29 +110,38 @@ function generateFlashcards(text) {
 
         card.innerHTML = `
             <div class="flashcard-inner">
-                
-                <div class="flashcard-back">
-    <p>📘 Réponse</p>
 
-    <div class="back-question">
-        ❓ ${question}
-    </div>
+                <!-- RECTO (QUESTION) -->
+                <div class="flashcard-front">
+                    <p>🧠 Question</p>
+                    <strong>${question}</strong>
+                </div>
 
-    <hr>
-
-    <div class="back-answer">
-        ${answer}
-    </div>
-</div>
-
-                <!-- VERSO -->
+                <!-- VERSO (RÉPONSE + QUESTION) -->
                 <div class="flashcard-back">
                     <p>📘 Réponse</p>
-                    <span>${answer}</span>
+
+                    <div class="back-question">
+                        ❓ ${question}
+                    </div>
+
+                    <hr>
+
+                    <div class="back-answer">
+                        ${answer}
+                    </div>
                 </div>
 
             </div>
         `;
+
+        card.addEventListener("click", () => {
+            card.classList.toggle("flipped");
+        });
+
+        flashcardsContainer.appendChild(card);
+    });
+}
 
         // INTERACTIVITÉ (flip)
         card.addEventListener("click", () => {
