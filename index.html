@@ -2,45 +2,50 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Mon Aide Révision IA</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Révis'IA 🚀</title>
     <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 </head>
 <body>
-    <header>
-        <h1>Révis'IA 🚀</h1>
-        <p>Colle ton cours ou importe un PDF pour commencer.</p>
-    </header>
 
-    <main>
+    <div class="app-container">
+        <header>
+            <h1>Révis'IA 🚀</h1>
+        </header>
+
         <section id="input-section">
             <div class="pdf-upload-zone">
-                <label for="pdf-file" class="pdf-label">📑 Importer un cours (PDF) :</label>
+                <label for="pdf-file" class="pdf-label">📑 Importer un cours (PDF)</label>
                 <input type="file" id="pdf-file" accept="application/pdf">
                 <p id="pdf-status"></p>
             </div>
-            
-            <textarea id="course-text" placeholder="Le texte du PDF s'affichera ici ou colle ton texte manuellement..."></textarea>
+            <textarea id="course-text" placeholder="Colle ton texte ici..."></textarea>
             <button id="generate-btn">Générer mes révisions</button>
         </section>
 
-        <section id="result-section">
-            <div class="card">
-                <h2>Résumé</h2>
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="summary">Résumé</button>
+            <button class="tab-btn" data-tab="flashcards">Flashcards</button>
+            <button class="tab-btn" data-tab="quiz">Quiz</button>
+        </div>
+
+        <div id="result-section">
+            <div id="summary-tab" class="tab-content active">
                 <div id="summary-display">Le résumé s'affichera ici.</div>
             </div>
 
-            <div class="card">
-                <h2>Flashcards</h2>
+            <div id="flashcards-tab" class="tab-content">
                 <div id="flashcards-container">Les questions s'afficheront ici.</div>
             </div>
-            <div class="card">
-                <h2>Quiz d'auto-évaluation 📝</h2>
-                <div id="quiz-container"></div>
+
+            <div id="quiz-tab" class="tab-content">
+                <div id="quiz-container">Le quiz s'affichera ici.</div>
             </div>
-        </section>
-    </main>
+        </div>
+    </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
-    <script src="script.js"></script> 
+    <script src="script.js"></script>
 </body>
-</html> 
+</html>
