@@ -187,3 +187,23 @@ function renderQuiz(quiz) {
 
     showQuestion();
 }
+
+// ==========================================
+// --- PARTIE 4 : LOGIQUE DES ONGLETS (TABS) ---
+// ==========================================
+document.querySelectorAll('.tab-btn').forEach(button => {
+    button.addEventListener('click', () => {
+        const tabName = button.getAttribute('data-tab');
+
+        // 1. Désactiver tous les boutons et contenus
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+        // 2. Activer le bon bouton et le bon contenu
+        button.classList.add('active');
+        const targetTab = document.getElementById(`${tabName}-tab`);
+        if (targetTab) {
+            targetTab.classList.add('active');
+        }
+    });
+});
