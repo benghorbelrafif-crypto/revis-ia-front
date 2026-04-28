@@ -9,7 +9,6 @@ if (pdfInput) {
         if (!file) return;
 
         pdfStatus.innerText = "⏳ Lecture du PDF en cours...";
-        // On vide la case avant de commencer pour éviter les conflits
         courseTextArea.value = ""; 
 
         try {
@@ -24,11 +23,9 @@ if (pdfInput) {
                 fullText += pageText + "\n";
             }
 
-            // --- MODIFICATION ICI ---
             if (fullText.trim().length > 0) {
-                courseTextArea.value = fullText; // On insère le texte
+                courseTextArea.value = fullText;
                 pdfStatus.innerText = "✅ PDF chargé ! Prêt à générer.";
-                console.log("Texte extrait :", fullText.substring(0, 100) + "..."); 
             } else {
                 pdfStatus.innerText = "⚠️ PDF vide ou illisible (image).";
             }
@@ -42,15 +39,12 @@ if (pdfInput) {
 
 // --- PARTIE 2 : GÉNÉRATION IA ---
 document.getElementById('generate-btn').addEventListener('click', async () => {
-    // MODIFICATION ICI : On récupère la valeur EXACTE au moment du clic
     const currentText = document.getElementById('course-text').value;
-    
     const summaryDisplay = document.getElementById('summary-display');
     const flashcardsContainer = document.getElementById('flashcards-container');
     const quizContainer = document.getElementById('quiz-container');
     const btn = document.getElementById('generate-btn');
 
-    // On vérifie si la variable contient bien du texte
     if (!currentText || currentText.trim().length < 5) {
         return alert("La zone de texte est vide ! Attends que le PDF s'affiche ou colle ton cours.");
     }
@@ -62,7 +56,7 @@ document.getElementById('generate-btn').addEventListener('click', async () => {
         const response = await fetch('https://revis-ia-back.onrender.com/generer', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ cours: currentText }) // On envoie le texte actuel
+            body: JSON.stringify({ cours: currentText })
         });
 
         if (!response.ok) throw new Error("Le serveur ne répond pas");
@@ -76,20 +70,35 @@ document.getElementById('generate-btn').addEventListener('click', async () => {
         } else if (typeof data.resume === 'object') {
             for (const [key, value] of Object.entries(data.resume)) {
                 const section = document.createElement('div');
-                section.innerHTML = `<h3 style="color:#6200ee; margin-top:10px;">${key}</h3><p>${value}</p>`;
+                section.innerHTML = `<h3 style="color:#6c5ce7; margin-top:10px;">${key}</h3><p>${value}</p>`;
                 summaryDisplay.appendChild(section);
             }
         }
 
-        // 2. AFFICHAGE DES FLASHCARDS
+        // 2. AFFICHAGE DES FLASHCARDS (AVEC EFFET RECTO/VERSO)
         flashcardsContainer.innerHTML = "";
         if (data.flashcards) {
             data.flashcards.forEach(card => {
-                const div = document.createElement('div');
-                div.style.padding = "10px";
-                div.style.borderBottom = "1px solid #eee";
-                div.innerHTML = `<p><strong>Q:</strong> ${card.question}</p><p><strong>R:</strong> ${card.reponse}</p>`;
-                flashcardsContainer.appendChild(div);
+                const cardElement = document.createElement('div');
+                cardElement.className = 'flashcard'; // Utilise le style CSS 3D
+                
+                cardElement.innerHTML = `
+                    <div class="flashcard-inner">
+                        <div class="flashcard-front">
+                            ${card.question}
+                        </div>
+                        <div class="flashcard-back">
+                            ${card.reponse}
+                        </div>
+                    </div>
+                `;
+
+                // INTERACTIVITÉ LUDIQUE : Retourner la carte au clic
+                cardElement.addEventListener('click', () => {
+                    cardElement.classList.toggle('flipped');
+                });
+
+                flashcardsContainer.appendChild(cardElement);
             });
         }
 
@@ -98,19 +107,17 @@ document.getElementById('generate-btn').addEventListener('click', async () => {
         if (data.quiz) {
             data.quiz.forEach((q, index) => {
                 const div = document.createElement('div');
-                div.className = "card";
-                div.style.marginBottom = "15px";
+                div.className = "quiz-item";
                 
                 let optionsHTML = q.options.map(opt => 
-                    `<button onclick="verifier(this, '${q.reponse_correcte.replace(/'/g, "\\'")}')" 
-                             style="display:block; width:100%; margin:5px 0; padding:10px; cursor:pointer; background:white; border:1px solid #ccc; border-radius:5px;">
+                    `<button onclick="verifier(this, '${q.reponse_correcte.replace(/'/g, "\\'")}')">
                         ${opt}
                     </button>`
                 ).join("");
                 
                 div.innerHTML = `
                     <p><strong>${index + 1}. ${q.question}</strong></p>
-                    ${optionsHTML}
+                    <div class="quiz-options">${optionsHTML}</div>
                     <p class="res" style="display:none; font-weight:bold; margin-top:10px;"></p>
                 `;
                 quizContainer.appendChild(div);
@@ -128,18 +135,20 @@ document.getElementById('generate-btn').addEventListener('click', async () => {
 
 // --- PARTIE 3 : FONCTION VÉRIFIER ---
 function verifier(btn, correct) {
-    const parent = btn.parentElement;
+    const parent = btn.parentElement.parentElement; // On remonte au quiz-item
     const res = parent.querySelector('.res');
     res.style.display = "block";
     
     if (btn.innerText.trim() === correct.trim()) {
         res.innerText = "✅ Correct !";
-        res.style.color = "green";
-        btn.style.backgroundColor = "#d4edda";
+        res.style.color = "#27ae60";
+        btn.classList.add('correct');
     } else {
         res.innerText = "❌ Faux. La réponse était : " + correct;
-        res.style.color = "red";
-        btn.style.backgroundColor = "#f8d7da";
+        res.style.color = "#e74c3c";
+        btn.classList.add('wrong');
     }
+    
+    // Désactiver tous les boutons de cette question après la réponse
     parent.querySelectorAll('button').forEach(b => b.disabled = true);
 }
