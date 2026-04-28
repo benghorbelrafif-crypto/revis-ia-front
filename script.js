@@ -16,6 +16,7 @@ if (pdfInput) {
         try {
             const arrayBuffer = await file.arrayBuffer();
             const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+
             let fullText = "";
 
             for (let i = 1; i <= pdf.numPages; i++) {
@@ -89,14 +90,9 @@ function generateSummary(text) {
 }
 
 // ===============================
-// PARTIE 5 : FLASHCARDS (FIXÉ)
+// PARTIE 5 : FLASHCARDS (CORRIGÉ)
 // ===============================
 function generateFlashcards(text) {
-    const sentences = text
-        .split(".")
-        .filter(s => s.trim().length > 20);
-
-    function generateFlashcards(text) {
     const sentences = text
         .split(".")
         .map(s => s.trim())
@@ -106,7 +102,6 @@ function generateFlashcards(text) {
 
     sentences.slice(0, 6).forEach((sentence) => {
 
-        // 🔥 transformation simple en "question"
         const question = transformToQuestion(sentence);
         const answer = sentence;
 
@@ -148,23 +143,25 @@ function generateFlashcards(text) {
     });
 }
 
-                    <hr>
+// ===============================
+// TRANSFORMATION QUESTION
+// ===============================
+function transformToQuestion(sentence) {
+    sentence = sentence.toLowerCase();
 
-                    <div class="back-answer">
-                        ${answer}
-                    </div>
-                </div>
+    if (sentence.includes("permet")) {
+        return "Que permet cette notion ?";
+    }
 
-            </div>
-        `;
+    if (sentence.includes("est")) {
+        return "Qu'est-ce que cela signifie ?";
+    }
 
-        // flip
-        card.addEventListener("click", () => {
-            card.classList.toggle("flipped");
-        });
+    if (sentence.includes("car") || sentence.includes("donc")) {
+        return "Pourquoi ?";
+    }
 
-        flashcardsContainer.appendChild(card);
-    });
+    return "Explique cette notion :";
 }
 
 // ===============================
