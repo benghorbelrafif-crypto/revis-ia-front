@@ -112,11 +112,19 @@ function generateFlashcards(text) {
         card.innerHTML = `
             <div class="flashcard-inner">
                 
-                <!-- RECTO -->
-                <div class="flashcard-front">
-                    <p>🧠 Question ${index + 1}</p>
-                    <strong>${question}</strong>
-                </div>
+                <div class="flashcard-back">
+    <p>📘 Réponse</p>
+
+    <div class="back-question">
+        ❓ ${question}
+    </div>
+
+    <hr>
+
+    <div class="back-answer">
+        ${answer}
+    </div>
+</div>
 
                 <!-- VERSO -->
                 <div class="flashcard-back">
