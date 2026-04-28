@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Mon Aide Révision IA</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Révis'IA 🚀</h1>
+        <p>Colle ton cours ou importe un PDF pour commencer.</p>
+    </header>
+
+    <main>
+        <section id="input-section">
+            <div class="pdf-upload-zone">
+                <label for="pdf-file" class="pdf-label">📑 Importer un cours (PDF) :</label>
+                <input type="file" id="pdf-file" accept="application/pdf">
+                <p id="pdf-status"></p>
+            </div>
+            
+            <textarea id="course-text" placeholder="Le texte du PDF s'affichera ici ou colle ton texte manuellement..."></textarea>
+            <button id="generate-btn">Générer mes révisions</button>
+        </section>
+
+        <section id="result-section">
+            <div class="card">
+                <h2>Résumé</h2>
+                <div id="summary-display">Le résumé s'affichera ici.</div>
+            </div>
+
+            <div class="card">
+                <h2>Flashcards</h2>
+                <div id="flashcards-container">Les questions s'afficheront ici.</div>
+            </div>
+            <div class="card">
+                <h2>Quiz d'auto-évaluation 📝</h2>
+                <div id="quiz-container"></div>
+            </div>
+        </section>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+    <script src="script.js"></script> 
+</body>
+</html>

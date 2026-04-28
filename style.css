@@ -1,0 +1,72 @@
+/* Style général */
+body { 
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+    background-color: #f4f4f9; 
+    padding: 20px; 
+    color: #333; 
+}
+
+main { max-width: 800px; margin: auto; }
+
+/* Zone de texte */
+textarea { 
+    width: 100%; 
+    height: 150px; 
+    border-radius: 10px; 
+    padding: 15px; 
+    border: 1px solid #ccc;
+    font-size: 16px;
+}
+
+/* Bouton principal */
+#generate-btn { 
+    background-color: #6200ee; 
+    color: white; 
+    border: none; 
+    padding: 15px 30px; 
+    border-radius: 5px; 
+    cursor: pointer; 
+    margin-top: 10px;
+    width: 100%;
+    font-weight: bold;
+}
+
+#generate-btn:disabled {
+    background-color: #aaa;
+}
+
+/* Cartes de résultats */
+.card { 
+    background: white; 
+    padding: 20px; 
+    border-radius: 10px; 
+    margin-top: 20px; 
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
+}
+
+/* STYLE DES BOUTONS DU QUIZ (Pour qu'ils soient visibles) */
+.quiz-btn {
+    display: block;
+    width: 100%;
+    margin: 8px 0;
+    padding: 12px;
+    text-align: left;
+    cursor: pointer;
+    background-color: #ffffff; /* Fond blanc */
+    color: #333333;            /* Texte Gris foncé (BIEN VISIBLE) */
+    border: 2px solid #6200ee; /* Bordure violette */
+    border-radius: 8px;
+    font-size: 14px;
+    transition: 0.3s;
+}
+
+.quiz-btn:hover {
+    background-color: #f0e6ff;
+}
+
+/* Feedback (Bonne/Mauvaise réponse) */
+.feedback {
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 5px;
+}
