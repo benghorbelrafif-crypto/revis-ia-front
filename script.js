@@ -110,12 +110,12 @@ window.addEventListener("DOMContentLoaded", () => {
             div.innerHTML = `
                 <div class="flashcard-inner">
                     <div class="flashcard-front">
-                        <small>🧠 QUESTION </small>
+                        <small>🧠 QUESTION</small>
                         <p><strong>${card.question}</strong></p>
                     </div>
                     <div class="flashcard-back">
                          <div class="flashcard-behind">
-                              <small>📘 RÉPONSE </small>
+                              <small>📘 RÉPONSE</small>
                         <p><strong>${card.reponse}</strong></p>
                     </div>
                 </div>`;
