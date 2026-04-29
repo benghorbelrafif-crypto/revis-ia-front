@@ -38,7 +38,9 @@ window.addEventListener("DOMContentLoaded", () => {
             }
             elements.courseText.value = text;
             elements.pdfStatus.innerText = "✅ PDF chargé !";
-        } catch (err) { elements.pdfStatus.innerText = "❌ Erreur PDF"; }
+        } catch (err) {
+            elements.pdfStatus.innerText = "❌ Erreur PDF";
+        }
     });
 
     // --- GENERER ---
@@ -59,7 +61,10 @@ window.addEventListener("DOMContentLoaded", () => {
             if (!response.ok) throw new Error();
 
             const data = await response.json();
-            elements.summary.innerHTML = data.resume || "Résumé indisponible.";
+
+            // ✅ MODIF ICI (résumé structuré)
+            renderResume(data.resume);
+
             renderFlashcards(data.flashcards || []);
             renderQuiz(data.quiz || []);
 
@@ -71,6 +76,32 @@ window.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+    // --- RENDER RESUME (NOUVEAU) ---
+    function renderResume(resume) {
+        elements.summary.innerHTML = "";
+
+        if (!Array.isArray(resume)) {
+            elements.summary.innerText = "Résumé indisponible.";
+            return;
+        }
+
+        resume.forEach(part => {
+            const div = document.createElement("div");
+            div.className = "resume-part";
+
+            div.innerHTML = `
+                <h3>${part.titre}</h3>
+                <p>${part.resume}</p>
+                <ul>
+                    ${(part.points_cles || []).map(p => `<li>${p}</li>`).join("")}
+                </ul>
+            `;
+
+            elements.summary.appendChild(div);
+        });
+    }
+
+    // --- FLASHCARDS ---
     function renderFlashcards(cards) {
         elements.flashcards.innerHTML = "";
         cards.forEach(card => {
@@ -92,6 +123,7 @@ window.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    // --- QUIZ ---
     function renderQuiz(questions) {
         elements.quiz.innerHTML = "";
         questions.forEach((q, i) => {
@@ -99,17 +131,18 @@ window.addEventListener("DOMContentLoaded", () => {
             const div = document.createElement("div");
             div.className = "quiz-card";
             div.innerHTML = `
-                <h3>Question ${i+1}</h3>
+                <h3>Question ${i + 1}</h3>
                 <p>${q.question}</p>
                 <div class="options">
                     ${q.options.map(opt => `<button class="opt">${opt}</button>`).join("")}
                 </div>
                 <p class="res" style="display:none; margin-top:10px; font-weight:bold;"></p>`;
-            
+
             div.querySelectorAll('.opt').forEach(btn => {
                 btn.onclick = () => {
                     const res = div.querySelector('.res');
                     res.style.display = "block";
+
                     if (btn.innerText.trim() === correct) {
                         btn.classList.add("correct");
                         res.innerText = "✅ Bravo !";
@@ -117,9 +150,11 @@ window.addEventListener("DOMContentLoaded", () => {
                         btn.classList.add("wrong");
                         res.innerText = "❌ Mauvais. C'était : " + correct;
                     }
+
                     div.querySelectorAll('.opt').forEach(b => b.disabled = true);
                 };
             });
+
             elements.quiz.appendChild(div);
         });
     }
