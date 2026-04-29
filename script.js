@@ -62,21 +62,19 @@ window.addEventListener("DOMContentLoaded", () => {
 
             const data = await response.json();
 
-            // ✅ MODIF ICI (résumé structuré)
             renderResume(data.resume);
-
             renderFlashcards(data.flashcards || []);
             renderQuiz(data.quiz || []);
 
         } catch (err) {
-            alert("⚠️ Erreur 500 : Le serveur Render a planté. Vérifie tes logs sur Render.com !");
+            alert("⚠️ Erreur serveur Render !");
         } finally {
             elements.generateBtn.disabled = false;
             elements.generateBtn.innerText = "Générer mes révisions";
         }
     });
 
-    // --- RENDER RESUME (NOUVEAU) ---
+    // --- RESUME ---
     function renderResume(resume) {
         elements.summary.innerHTML = "";
 
@@ -104,9 +102,11 @@ window.addEventListener("DOMContentLoaded", () => {
     // --- FLASHCARDS ---
     function renderFlashcards(cards) {
         elements.flashcards.innerHTML = "";
+
         cards.forEach(card => {
             const div = document.createElement("div");
             div.className = "flashcard";
+
             div.innerHTML = `
                 <div class="flashcard-inner">
                     <div class="flashcard-front">
@@ -118,37 +118,51 @@ window.addEventListener("DOMContentLoaded", () => {
                         <p>${card.reponse}</p>
                     </div>
                 </div>`;
+
             div.onclick = () => div.classList.toggle("flipped");
             elements.flashcards.appendChild(div);
         });
     }
 
-    // --- QUIZ ---
+    // --- QUIZ (AVEC EXPLICATION) ---
     function renderQuiz(questions) {
         elements.quiz.innerHTML = "";
+
         questions.forEach((q, i) => {
             const correct = String(q.reponse_correcte || "").trim();
             const div = document.createElement("div");
             div.className = "quiz-card";
+
             div.innerHTML = `
                 <h3>Question ${i + 1}</h3>
                 <p>${q.question}</p>
+
                 <div class="options">
                     ${q.options.map(opt => `<button class="opt">${opt}</button>`).join("")}
                 </div>
-                <p class="res" style="display:none; margin-top:10px; font-weight:bold;"></p>`;
+
+                <p class="res" style="display:none; margin-top:10px; font-weight:bold;"></p>
+                <small class="explication" style="display:none; color:gray; margin-top:5px;"></small>
+            `;
 
             div.querySelectorAll('.opt').forEach(btn => {
                 btn.onclick = () => {
                     const res = div.querySelector('.res');
+                    const exp = div.querySelector('.explication');
+
                     res.style.display = "block";
+                    exp.style.display = "block";
+
+                    const explanation = q.explication || "";
 
                     if (btn.innerText.trim() === correct) {
                         btn.classList.add("correct");
-                        res.innerText = "✅ Bravo !";
+                        res.innerHTML = "✅ Bonne réponse";
+                        exp.innerText = explanation;
                     } else {
                         btn.classList.add("wrong");
-                        res.innerText = "❌ Mauvais. C'était : " + correct;
+                        res.innerHTML = "❌ Mauvaise réponse. Bonne réponse : " + correct;
+                        exp.innerText = explanation;
                     }
 
                     div.querySelectorAll('.opt').forEach(b => b.disabled = true);
