@@ -114,8 +114,9 @@ window.addEventListener("DOMContentLoaded", () => {
                         <p><strong>${card.question}</strong></p>
                     </div>
                     <div class="flashcard-back">
-                        <small>📘 RÉPONSE</small>
-                        <p>${card.reponse}</p>
+                         <div class="flashcard-behind">
+                              <small>📘 RÉPONSE</small>
+                        <p><strong>${card.reponse}</strong></p>
                     </div>
                 </div>`;
 
