@@ -1,243 +1,164 @@
-
-// ===============================
-// ATTEND QUE LE DOM CHARGE
-// ===============================
 window.addEventListener("DOMContentLoaded", () => {
 
-    // ===============================
-    // PDF IMPORT
-    // ===============================
+    // --- CONFIGURATION PDF ---
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+
     const pdfInput = document.getElementById('pdf-file');
     const courseTextArea = document.getElementById('course-text');
     const pdfStatus = document.getElementById('pdf-status');
-
-    if (pdfInput) {
-        pdfInput.addEventListener('change', async (event) => {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            pdfStatus.innerText = "⏳ Lecture du PDF...";
-            courseTextArea.value = "";
-
-            try {
-                const arrayBuffer = await file.arrayBuffer();
-                const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-
-                let fullText = "";
-
-                for (let i = 1; i <= pdf.numPages; i++) {
-                    const page = await pdf.getPage(i);
-                    const textContent = await page.getTextContent();
-                    const pageText = textContent.items.map(item => item.str).join(" ");
-                    fullText += pageText + "\n";
-                }
-
-                courseTextArea.value = fullText;
-                pdfStatus.innerText = "✅ PDF chargé !";
-
-            } catch (error) {
-                console.error(error);
-                pdfStatus.innerText = "❌ Erreur PDF";
-            }
-        });
-    }
-
-    // ===============================
-    // TABS
-    // ===============================
-    const tabButtons = document.querySelectorAll('.tab-btn');
-    const tabContents = document.querySelectorAll('.tab-content');
-
-    tabButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-
-            tabButtons.forEach(b => b.classList.remove('active'));
-            tabContents.forEach(c => c.classList.remove('active'));
-
-            btn.classList.add('active');
-            document.getElementById(btn.dataset.tab + '-tab').classList.add('active');
-        });
-    });
-
-    // ===============================
-    // ELEMENTS
-    // ===============================
     const generateBtn = document.getElementById('generate-btn');
     const summaryDisplay = document.getElementById('summary-display');
     const flashcardsContainer = document.getElementById('flashcards-container');
     const quizContainer = document.getElementById('quiz-container');
 
-    // ===============================
-    // BOUTON GENERER (FIX)
-    // ===============================
+    // --- GESTION DU PDF ---
+    if (pdfInput) {
+        pdfInput.addEventListener('change', async (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            pdfStatus.innerText = "⏳ Lecture du PDF...";
+            try {
+                const arrayBuffer = await file.arrayBuffer();
+                const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                let fullText = "";
+                for (let i = 1; i <= pdf.numPages; i++) {
+                    const page = await pdf.getPage(i);
+                    const textContent = await page.getTextContent();
+                    fullText += textContent.items.map(item => item.str).join(" ") + "\n";
+                }
+                courseTextArea.value = fullText;
+                pdfStatus.innerText = "✅ PDF chargé !";
+            } catch (error) {
+                pdfStatus.innerText = "❌ Erreur PDF";
+            }
+        });
+    }
+
+    // --- GESTION DES ONGLETS (TABS) ---
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    tabButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            tabButtons.forEach(b => b.classList.remove('active'));
+            tabContents.forEach(c => c.classList.remove('active'));
+            btn.classList.add('active');
+            const targetId = btn.dataset.tab + '-tab';
+            document.getElementById(targetId).classList.add('active');
+        });
+    });
+
+    // --- APPEL À L'IA (BOUTON GÉNÉRER) ---
     if (generateBtn) {
-        generateBtn.addEventListener('click', () => {
-
+        generateBtn.addEventListener('click', async () => {
             const text = courseTextArea.value.trim();
-
-            if (!text) {
-                alert("Ajoute du texte ou un PDF !");
+            if (!text || text.length < 10) {
+                alert("Colle un cours plus long pour que l'IA puisse travailler !");
                 return;
             }
 
-            summaryDisplay.innerHTML = "⏳ Génération...";
-            flashcardsContainer.innerHTML = "";
-            quizContainer.innerHTML = "";
+            // État de chargement
+            generateBtn.disabled = true;
+            generateBtn.innerText = "⏳ L'IA analyse ton cours...";
+            summaryDisplay.innerHTML = "L'IA rédige le résumé...";
+            flashcardsContainer.innerHTML = "Génération des questions...";
 
-            setTimeout(() => {
-                generateSummary(text);
-                generateFlashcards(text);
-                generateQuiz(text);
-            }, 500);
+            try {
+                // APPEL AU BACKEND RENDER
+                const response = await fetch('https://revis-ia-back.onrender.com/generer', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ cours: text })
+                });
+
+                if (!response.ok) throw new Error("Serveur en sommeil");
+
+                const data = await response.json();
+
+                // 1. AFFICHAGE DU RÉSUMÉ
+                summaryDisplay.innerHTML = data.resume || "Résumé indisponible.";
+
+                // 2. AFFICHAGE DES FLASHCARDS (Recto/Verso)
+                renderFlashcards(data.flashcards);
+
+                // 3. AFFICHAGE DU QUIZ
+                renderQuiz(data.quiz);
+
+            } catch (error) {
+                console.error(error);
+                alert("Le serveur Render se réveille... Re-clique sur Générer dans 10 secondes !");
+            } finally {
+                generateBtn.disabled = false;
+                generateBtn.innerText = "Générer mes révisions";
+            }
         });
     }
 
-    // ===============================
-    // RESUME
-    // ===============================
-    function generateSummary(text) {
-        const sentences = text.split(".");
-        const summary = sentences.slice(0, 3).join(".") + ".";
-
-        summaryDisplay.innerHTML = summary || "Résumé indisponible.";
-    }
-
-    // ===============================
-    // FLASHCARDS (RECTO = QUESTION / VERSO = REPONSE)
-    // ===============================
-    function generateFlashcards(text) {
-
-        const sentences = text
-            .split(".")
-            .map(s => s.trim())
-            .filter(s => s.length > 30);
-
+    // --- FONCTION FLASHCARDS ---
+    function renderFlashcards(cards) {
         flashcardsContainer.innerHTML = "";
+        if (!cards || cards.length === 0) {
+            flashcardsContainer.innerHTML = "Aucune flashcard générée.";
+            return;
+        }
 
-        sentences.slice(0, 6).forEach((sentence) => {
-
-            const question = createQuestion(sentence);
-            const answer = sentence;
-
-            const card = document.createElement("div");
-            card.className = "flashcard";
-
-            card.innerHTML = `
+        cards.forEach(card => {
+            const div = document.createElement("div");
+            div.className = "flashcard";
+            div.innerHTML = `
                 <div class="flashcard-inner">
-
-                    <!-- RECTO -->
                     <div class="flashcard-front">
-                        <p>🧠 Question</p>
-                        <strong>${question}</strong>
+                        <p style="font-size: 0.8rem; opacity: 0.7;">🧠 QUESTION</p>
+                        <strong>${card.question}</strong>
+                        <p style="margin-top: 15px; font-size: 0.7rem;">(Clique pour voir la réponse)</p>
                     </div>
-
-                    <!-- VERSO -->
                     <div class="flashcard-back">
-                        <p>📘 Réponse</p>
-
-                        <div class="back-question">
-                            ❓ ${question}
-                        </div>
-
-                        <hr>
-
-                        <div class="back-answer">
-                            ${answer}
-                        </div>
+                        <p style="font-size: 0.8rem; opacity: 0.7;">📘 RÉPONSE</p>
+                        <div>${card.reponse}</div>
                     </div>
-
                 </div>
             `;
-
-            card.addEventListener("click", () => {
-                card.classList.toggle("flipped");
-            });
-
-            flashcardsContainer.appendChild(card);
+            div.addEventListener("click", () => div.classList.toggle("flipped"));
+            flashcardsContainer.appendChild(div);
         });
     }
 
-    // ===============================
-    // TRANSFORMATION QUESTION
-    // ===============================
-    function createQuestion(sentence) {
+    // --- FONCTION QUIZ ---
+    function renderQuiz(questions) {
+        quizContainer.innerHTML = "";
+        if (!questions) return;
 
-        sentence = sentence.toLowerCase();
-
-        if (sentence.includes("permet")) {
-            return "Que permet cette notion ?";
-        }
-
-        if (sentence.includes("est")) {
-            return "Qu'est-ce que cela signifie ?";
-        }
-
-        if (sentence.includes("car") || sentence.includes("donc")) {
-            return "Pourquoi ?";
-        }
-
-        return "Explique cette notion :";
-    }
-
-    // ===============================
-    // QUIZ
-    // ===============================
-    function generateQuiz(text) {
-
-        const sentences = text.split(".").filter(s => s.trim().length > 20);
-
-        let current = 0;
-
-        function showQuestion() {
-
-            if (current >= sentences.length || current >= 5) {
-                quizContainer.innerHTML = "<h3>✅ Quiz terminé !</h3>";
-                return;
-            }
-
-            const correct = sentences[current];
-            const fake1 = "Réponse incorrecte 1";
-            const fake2 = "Réponse incorrecte 2";
-
-            const options = shuffle([correct, fake1, fake2]);
-
-            quizContainer.innerHTML = `
-                <div class="quiz-card">
-                    <h3>Question ${current + 1}</h3>
-                    <p>Complète :</p>
-                    <strong>${correct.slice(0, 40)}...</strong>
-
-                    <div class="options">
-                        ${options.map(opt => `<button class="opt">${opt}</button>`).join("")}
-                    </div>
+        questions.forEach((q, index) => {
+            const correct = String(q.reponse_correcte || "").trim();
+            const quizDiv = document.createElement("div");
+            quizDiv.className = "quiz-card";
+            quizDiv.style.marginBottom = "20px";
+            
+            quizDiv.innerHTML = `
+                <h3>Question ${index + 1}</h3>
+                <p>${q.question}</p>
+                <div class="options" id="opts-${index}">
+                    ${q.options.map(opt => `<button class="opt">${opt}</button>`).join("")}
                 </div>
+                <p class="feedback-${index}" style="margin-top:10px; font-weight:bold;"></p>
             `;
 
-            document.querySelectorAll(".opt").forEach(btn => {
-                btn.addEventListener("click", () => {
+            quizContainer.appendChild(quizDiv);
 
-                    if (btn.innerText === correct) {
+            const buttons = quizDiv.querySelectorAll('.opt');
+            buttons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const feedback = quizDiv.querySelector(`.feedback-${index}`);
+                    if (btn.innerText.trim() === correct) {
                         btn.classList.add("correct");
+                        feedback.innerText = "✅ Excellent !";
                     } else {
                         btn.classList.add("wrong");
+                        feedback.innerText = "❌ Non. La réponse était : " + correct;
                     }
-
-                    setTimeout(() => {
-                        current++;
-                        showQuestion();
-                    }, 800);
+                    quizDiv.querySelectorAll('.opt').forEach(b => b.disabled = true);
                 });
             });
-        }
-
-        showQuestion();
+        });
     }
-
-    // ===============================
-    // SHUFFLE
-    // ===============================
-    function shuffle(array) {
-        return array.sort(() => Math.random() - 0.5);
-    }
-
 });
