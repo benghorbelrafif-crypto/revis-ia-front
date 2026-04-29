@@ -169,7 +169,7 @@ window.addEventListener("DOMContentLoaded", () => {
                         exp.innerText = explanation;
                     } else {
                         btn.classList.add("wrong");
-                        res.innerHTML = "❌ Mauvaise réponse. Bonne réponse : " + correct;
+                        res.innerHTML = "❌ Mauvaise réponse : " + correct;
                         exp.innerText = explanation;
                     }
 
