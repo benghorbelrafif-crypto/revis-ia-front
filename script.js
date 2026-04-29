@@ -124,12 +124,19 @@ window.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // --- QUIZ (AVEC EXPLICATION) ---
+    // --- QUIZ FIX (IMPORTANT) ---
     function renderQuiz(questions) {
         elements.quiz.innerHTML = "";
 
+        const normalize = (str) =>
+            str?.toLowerCase().replace(/\s+/g, "").replace(/\)/g, "").trim();
+
         questions.forEach((q, i) => {
             const correct = String(q.reponse_correcte || "").trim();
+
+            // 🔥 shuffle des réponses (IMPORTANT)
+            const shuffled = [...q.options].sort(() => Math.random() - 0.5);
+
             const div = document.createElement("div");
             div.className = "quiz-card";
 
@@ -138,7 +145,7 @@ window.addEventListener("DOMContentLoaded", () => {
                 <p>${q.question}</p>
 
                 <div class="options">
-                    ${q.options.map(opt => `<button class="opt">${opt}</button>`).join("")}
+                    ${shuffled.map(opt => `<button class="opt">${opt}</button>`).join("")}
                 </div>
 
                 <p class="res" style="display:none; margin-top:10px; font-weight:bold;"></p>
@@ -155,7 +162,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
                     const explanation = q.explication || "";
 
-                    if (btn.innerText.trim() === correct) {
+                    if (normalize(btn.innerText) === normalize(correct)) {
                         btn.classList.add("correct");
                         res.innerHTML = "✅ Bonne réponse";
                         exp.innerText = explanation;
