@@ -1,7 +1,6 @@
 window.addEventListener("DOMContentLoaded", () => {
 
     const maxChars = 3000;
-    const API_URL = "https://revis-ia-back.onrender.com/generer";
 
     const elements = {
         courseText: document.getElementById('course-text'),
@@ -13,25 +12,6 @@ window.addEventListener("DOMContentLoaded", () => {
     };
 
     // ===============================
-    // PROTECTION DOM
-    // ===============================
-    if (!elements.courseText || !elements.generateBtn || !elements.summary || !elements.flashcards || !elements.quiz) {
-        console.error("❌ Éléments HTML manquants");
-        return;
-    }
-
-    // ===============================
-    // COMPTEUR DE CARACTÈRES
-    // ===============================
-    elements.courseText.addEventListener("input", () => {
-        const length = elements.courseText.value.length;
-        if (elements.charCount) {
-            elements.charCount.innerText = `${length} / ${maxChars}`;
-            elements.charCount.style.color = length > maxChars ? "red" : "black";
-        }
-    });
-
-    // ===============================
     // GESTION DES ONGLETS (TABS)
     // ===============================
     const tabBtns = document.querySelectorAll('.tab-btn');
@@ -41,11 +21,9 @@ window.addEventListener("DOMContentLoaded", () => {
         btn.addEventListener('click', () => {
             const targetTab = btn.getAttribute('data-tab');
 
-            // Désactiver tous les boutons et cacher les contenus
             tabBtns.forEach(b => b.classList.remove('active'));
             tabContents.forEach(c => c.classList.remove('active'));
 
-            // Activer le bouton cliqué et l'onglet correspondant
             btn.classList.add('active');
             const activeContent = document.getElementById(`${targetTab}-tab`);
             if (activeContent) {
@@ -55,41 +33,47 @@ window.addEventListener("DOMContentLoaded", () => {
     });
 
     // ===============================
-    // GÉNÉRATION VIA API
+    // COMPTEUR CARACTÈRES
     // ===============================
-    elements.generateBtn.addEventListener('click', async () => {
+    if (elements.courseText && elements.charCount) {
+        elements.courseText.addEventListener("input", () => {
+            const length = elements.courseText.value.length;
+            elements.charCount.innerText = `${length} / ${maxChars}`;
+            elements.charCount.style.color = length > maxChars ? "red" : "black";
+        });
+    }
+
+    // ===============================
+    // GENERATION
+    // ===============================
+    elements.generateBtn?.addEventListener('click', async () => {
+
         const content = elements.courseText.value.trim();
 
         if (!content) return alert("Ajoute ton cours !");
-        if (content.length > maxChars) return alert("Texte trop long");
+        if (content.length > maxChars) return alert("⚠️ Texte trop long (max 3000)");
 
         elements.generateBtn.disabled = true;
-        elements.generateBtn.innerText = "⏳ IA...";
+        elements.generateBtn.innerText = "⏳ L'IA travaille...";
 
         try {
-            const response = await fetch(API_URL, {
+            const response = await fetch('https://revis-ia-back.onrender.com/generer', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ cours: content })
             });
 
-            if (!response.ok) {
-                const errText = await response.text();
-                console.error("API ERROR:", response.status, errText);
-                throw new Error(`HTTP ${response.status}`);
-            }
+            if (!response.ok) throw new Error();
 
             const data = await response.json();
 
-            // Affichage des données
             renderResume(data.resume);
             renderFlashcards(data.flashcards || []);
             renderQuiz(data.quiz || []);
 
         } catch (err) {
-            console.error("Fetch error:", err);
-            // Si tu vois cette alerte, vérifie ta clé API sur Render
-            alert("⚠️ Erreur serveur / Clé API invalide sur Render");
+            // Si cette alerte s'affiche, vérifie ta clé API sur Render
+            alert("⚠️ Erreur serveur Render ! Vérifie ta clé API.");
         } finally {
             elements.generateBtn.disabled = false;
             elements.generateBtn.innerText = "Générer mes révisions";
@@ -97,10 +81,11 @@ window.addEventListener("DOMContentLoaded", () => {
     });
 
     // ===============================
-    // RENDU DU RÉSUMÉ
+    // RESUME
     // ===============================
     function renderResume(resume) {
         elements.summary.innerHTML = "";
+
         if (!Array.isArray(resume)) {
             elements.summary.innerText = "Résumé indisponible.";
             return;
@@ -109,11 +94,12 @@ window.addEventListener("DOMContentLoaded", () => {
         resume.forEach(part => {
             const div = document.createElement("div");
             div.className = "resume-part";
+
             div.innerHTML = `
-                <h3>${part.titre || "Sans titre"}</h3>
-                <p>${part.resume || ""}</p>
+                <h3>${part.titre}</h3>
+                <p>${part.resume}</p>
                 <ul>
-                    ${(part.points_cles || []).map(p => `<li>${p}</li>`).join('')}
+                    ${(part.points_cles || []).map(p => `<li>${p}</li>`).join("")}
                 </ul>
             `;
             elements.summary.appendChild(div);
@@ -121,15 +107,10 @@ window.addEventListener("DOMContentLoaded", () => {
     }
 
     // ===============================
-    // RENDU DES FLASHCARDS
+    // FLASHCARDS
     // ===============================
     function renderFlashcards(cards) {
         elements.flashcards.innerHTML = "";
-        if (cards.length === 0) {
-            elements.flashcards.innerHTML = "<p>Aucune flashcard générée.</p>";
-            return;
-        }
-
         cards.forEach(card => {
             const div = document.createElement("div");
             div.className = "flashcard";
@@ -137,81 +118,77 @@ window.addEventListener("DOMContentLoaded", () => {
                 <div class="flashcard-inner">
                     <div class="flashcard-front">
                         <small>🧠 QUESTION</small>
-                        <p><strong>${card.question || ""}</strong></p>
+                        <p><strong>${card.question}</strong></p>
                     </div>
                     <div class="flashcard-back">
                         <small>📘 RÉPONSE</small>
-                        <p>${card.reponse || ""}</p>
+                        <p style="opacity:0.8;">❓ ${card.question}</p>
+                        <hr>
+                        <p>${card.reponse}</p>
                     </div>
                 </div>
             `;
-            div.addEventListener("click", () => div.classList.toggle("flipped"));
+            div.onclick = () => div.classList.toggle("flipped");
             elements.flashcards.appendChild(div);
         });
     }
 
     // ===============================
-    // RENDU DU QUIZ
+    // QUIZ + SCORE
     // ===============================
     function renderQuiz(questions) {
         elements.quiz.innerHTML = "";
-        if (questions.length === 0) {
-            elements.quiz.innerHTML = "<p>Aucun quiz généré.</p>";
-            return;
-        }
-
         let score = 0;
-        let index = 0;
+        let total = questions.length;
 
-        const normalize = (str) => (str || "").toLowerCase().replace(/\s+/g, "");
+        const normalize = (str) =>
+            str?.toLowerCase().replace(/\s+/g, "").trim();
 
-        function showQuestion() {
-            if (index >= questions.length) {
-                elements.quiz.innerHTML = `
-                    <div style="text-align:center;padding:20px;">
-                        <h2>🏁 Quiz terminé</h2>
-                        <h3>🏆 Score : ${score} / ${questions.length}</h3>
-                    </div>
-                `;
-                return;
-            }
+        questions.forEach((q, i) => {
+            const correct = String(q.reponse_correcte || "").trim();
+            const shuffled = [...(q.options || [])].sort(() => Math.random() - 0.5);
 
-            const q = questions[index];
-            const options = [...(q.options || [])].sort(() => Math.random() - 0.5);
+            const div = document.createElement("div");
+            div.className = "quiz-card";
 
-            elements.quiz.innerHTML = `
-                <div class="quiz-card">
-                    <h3>Question ${index + 1}</h3>
-                    <p>${q.question || ""}</p>
-                    <div class="options">
-                        ${options.map(o => `<button class="opt">${o}</button>`).join("")}
-                    </div>
-                    <p class="res" style="display:none;"></p>
+            div.innerHTML = `
+                <h3>Question ${i + 1}</h3>
+                <p>${q.question}</p>
+                <div class="options">
+                    ${shuffled.map(opt => `<button class="opt">${opt}</button>`).join("")}
                 </div>
-                <div style="margin-top:10px;font-weight:bold;">Score : ${score}</div>
+                <p class="res" style="display:none; margin-top:10px; font-weight:bold;"></p>
+                <small class="explication" style="display:none; color:gray;"></small>
             `;
 
-            elements.quiz.querySelectorAll(".opt").forEach(btn => {
-                btn.addEventListener("click", () => {
-                    const res = elements.quiz.querySelector(".res");
+            div.querySelectorAll('.opt').forEach(btn => {
+                btn.onclick = () => {
+                    const res = div.querySelector('.res');
+                    const exp = div.querySelector('.explication');
+
                     res.style.display = "block";
-                    
-                    const isCorrect = normalize(btn.innerText) === normalize(q.reponse_correcte);
-                    
-                    if (isCorrect) {
+                    exp.style.display = "block";
+
+                    if (normalize(btn.innerText) === normalize(correct)) {
                         btn.classList.add("correct");
-                        res.innerText = "✅ Bonne réponse !";
+                        res.innerText = "✅ Bonne réponse";
                         score++;
                     } else {
                         btn.classList.add("wrong");
-                        res.innerText = `❌ Faux : ${q.reponse_correcte}`;
+                        res.innerText = "❌ Faux. Réponse : " + correct;
                     }
-
-                    elements.quiz.querySelectorAll(".opt").forEach(b => b.disabled = true);
-                    setTimeout(() => { index++; showQuestion(); }, 1200);
-                });
+                    exp.innerText = q.explication || "";
+                    div.querySelectorAll('.opt').forEach(b => b.disabled = true);
+                    document.getElementById("quiz-score").innerHTML = `🏆 Score : ${score} / ${total}`;
+                };
             });
-        }
-        showQuestion();
+            elements.quiz.appendChild(div);
+        });
+
+        const scoreDiv = document.createElement("div");
+        scoreDiv.id = "quiz-score";
+        scoreDiv.style = "margin-bottom:15px;font-weight:bold;font-size:18px;";
+        scoreDiv.innerHTML = `🏆 Score : 0 / ${total}`;
+        elements.quiz.prepend(scoreDiv);
     }
 });
