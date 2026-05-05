@@ -2,6 +2,8 @@ window.addEventListener("DOMContentLoaded", () => {
 
     const maxChars = 3000;
 
+    const API_URL = "https://revis-ia-back.onrender.com/generer";
+
     const elements = {
         courseText: document.getElementById('course-text'),
         generateBtn: document.getElementById('generate-btn'),
@@ -29,7 +31,7 @@ window.addEventListener("DOMContentLoaded", () => {
     });
 
     // ===============================
-    // GENERATION
+    // GENERATION (avec gestion 403 propre)
     // ===============================
     elements.generateBtn.addEventListener('click', async () => {
 
@@ -42,15 +44,19 @@ window.addEventListener("DOMContentLoaded", () => {
         elements.generateBtn.innerText = "⏳ IA...";
 
         try {
-            const response = await fetch('https://revis-ia-back.onrender.com/generer', {
+            const response = await fetch(API_URL, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json'
+                },
                 body: JSON.stringify({ cours: content })
             });
 
+            // 🔥 DEBUG IMPORTANT POUR TON ERREUR 403
             if (!response.ok) {
                 const errText = await response.text();
-                throw new Error(errText);
+                console.error("API ERROR:", response.status, errText);
+                throw new Error(`HTTP ${response.status}`);
             }
 
             const data = await response.json();
@@ -60,8 +66,8 @@ window.addEventListener("DOMContentLoaded", () => {
             renderQuiz(data.quiz || []);
 
         } catch (err) {
-            console.error(err);
-            alert("⚠️ Erreur serveur");
+            console.error("Fetch error:", err);
+            alert("⚠️ Erreur serveur (ou CORS / Render bloqué)");
         } finally {
             elements.generateBtn.disabled = false;
             elements.generateBtn.innerText = "Générer mes révisions";
@@ -141,7 +147,7 @@ window.addEventListener("DOMContentLoaded", () => {
     }
 
     // ===============================
-    // QUIZ FIX + STABLE VERSION
+    // QUIZ STABLE (CORRIGÉ)
     // ===============================
     function renderQuiz(questions) {
 
@@ -193,7 +199,6 @@ window.addEventListener("DOMContentLoaded", () => {
                     </div>
 
                     <p class="res" style="display:none;"></p>
-                    <small class="explication" style="display:none;"></small>
                 </div>
 
                 <div style="margin-top:10px;font-weight:bold;">
@@ -206,7 +211,6 @@ window.addEventListener("DOMContentLoaded", () => {
                 btn.addEventListener("click", () => {
 
                     const res = elements.quiz.querySelector(".res");
-
                     res.style.display = "block";
 
                     const ok = normalize(btn.innerText) === normalize(correct);
@@ -227,7 +231,7 @@ window.addEventListener("DOMContentLoaded", () => {
                     setTimeout(() => {
                         index++;
                         show();
-                    }, 800);
+                    }, 700);
                 });
             });
         }
