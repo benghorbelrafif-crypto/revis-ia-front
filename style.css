@@ -1,85 +1,309 @@
+/* ===============================
+   THEME BARBIE GLITTER & FOCUS
+   =============================== */
 :root {
-    --primary: #6c5ce7;
-    --bg: #f0f2f5;
+    --primary: #FF69B4; /* Rose Barbie Vif */
+    --primary-light: #FFB6C1; /* Rose Pâle Pailleté */
+    --primary-dark: #C71585; /* Rose Foncé pour le texte sur rose */
+    --bg: #FFF0F5; /* Fond Lavande/Rose très clair */
     --card: #ffffff;
+    --text: #333333;
+    --glitter: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgdmlld0JveD0iMCAwIDQwIDQwIj48ZyBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmJmZjAiIGZpbGwtb3BhY2l0eT0iMC4yIj48cGF0aCBkPSJNMCAwaDR2NEgwVjB6bTQgNGg0djRIMFY0em00IDRoNHY0SDBWOHptNCA0aDR2NEgwVjEyek0wIDhoNHY0SDBWOHptNC00aDR2NEgwVjR6bTQtNGg0djRIMFYwek0wIDEyaDR2NEgwVi4yem00LTRoNHY0SDBWOHptNC00aDR2NEgwVjR6bTQtNGg0djRIMFYwek0wIDE2aDR2NEgwViE2em00LTRoNHY0SDBWMTJ6bTQtNGg0djRIMFY4em00LTRoNHY0SDBWNHptNCA0aDR2NEgwVjB6TTAgMjBoNHY0SDBWMjB6bTQtNGg0djRIMFYxNnptNC00aDR2NEgwVjEyek0wIDI0aDR2NEgwVjI0em00LTRoNHY0SDBWMjB6bTQtNGg0djRIMFYxNnptMC00aDR2NEgwVjEyem0wLDRoNHY0SDBWOHptMC04aDR2NEgwVjR6bTAtNGg0djRIMFYwek0wIDI4aDR2NEgwViI4em00LTRoNHY0SDBWMjR6bTQtNGg0djRIMFYyMHptMC00aDR2NEgwVjE2em00LTRoNHY0SDBWMTJ6bTAtNGg0djRIMFY4em0wLTRoNHY0SDBWNHptMC04aDR2NEgwVjB6TTAgMzJoNHY0SDBWMzJ6bTQtNGg0djRIMFYyOHptNC00aDR2NEgwVjI0em0wLTRoNHY0SDBWMjB6bTQtNGg0djRIMFYxNnptNC00aDR2NEgwVjEyek0wIDM2aDR2NEgwViE2em00LTRoNHY0SDBWMzJ6bTQtNGg0djRIMFYyOHptNC00aDR2NEgwVjI0em00LTRoNHY0SDBWMjB6bTQtNGg0djRIMFYxNnptNC00aDR2NEgwVjEyek0wIDQwaDR2NEgwVjQwem00LTRoNHY0SDBWMzZ6bTQtNGg0djRIMFYzMnpmNC00aDR2NEgwVjI4em00LTRoNHY0SDBWMjR6bTQtNGg0djRIMFYyMHptNC00aDR2NEgwVjE2em00LTRoNHY0SDBWMTJ6Ii8+PC9nPjwvZz48L3N2Zz4=');
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
+* { 
+    box-sizing: border-box; 
+    margin: 0; 
+    padding: 0; 
+}
 
+/* On utilise tout l'écran, avec des paillettes subtiles */
 body {
     font-family: 'Poppins', sans-serif;
     background-color: var(--bg);
+    background-image: var(--glitter); /* Ajout des paillettes au fond */
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
     padding: 20px;
+    color: var(--text);
 }
 
+/* Le conteneur s'élargit pour l'effet Quizlet */
 .app-container {
-    max-width: 600px;
+    width: 100%;
+    max-width: 1000px; /* Plus large pour prendre l'espace */
     margin: 0 auto;
-    background: var(--card);
-    padding: 20px;
-    border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    background: rgba(255, 255, 255, 0.95); /* Blanc semi-transparent */
+    padding: 40px; /* Plus d'espace interne */
+    border-radius: 30px; /* Coins plus arrondis */
+    box-shadow: 0 15px 50px rgba(255, 105, 180, 0.15); /* Ombre rose douce */
+    border: 3px solid var(--primary-light); /* Bordure rose pâle */
 }
 
-header h1 { text-align: center; color: var(--primary); margin-bottom: 20px; }
+/* Header plus grand et scintillant */
+header h1 { 
+    text-align: center; 
+    color: var(--primary); 
+    margin-bottom: 30px; 
+    font-size: 2.5rem;
+    font-weight: 800;
+    text-shadow: 2px 2px 0px white, 4px 4px 0px var(--primary-light);
+}
 
 textarea {
-    width: 100%; height: 120px; padding: 15px;
-    border: 2px solid #eee; border-radius: 12px;
-    margin-bottom: 15px; font-family: inherit;
+    width: 100%; 
+    height: 150px; /* Plus grand */
+    padding: 20px;
+    border: 2px solid var(--primary-light); 
+    border-radius: 15px;
+    margin-bottom: 20px; 
+    font-family: inherit;
+    font-size: 1.1rem;
+    background-color: #fffaff;
+}
+
+textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 10px rgba(255, 105, 180, 0.3);
 }
 
 button#generate-btn {
-    width: 100%; padding: 15px; background: var(--primary);
-    color: white; border: none; border-radius: 12px;
-    font-weight: bold; cursor: pointer; margin-bottom: 25px;
+    width: 100%; 
+    padding: 18px; 
+    background: var(--primary);
+    color: white; 
+    border: none; 
+    border-radius: 15px;
+    font-weight: 800; 
+    font-size: 1.2rem;
+    cursor: pointer; 
+    margin-bottom: 35px;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
-/* --- TABS --- */
+button#generate-btn:hover {
+    background: var(--primary-dark);
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(199, 21, 133, 0.4);
+}
+
+button#generate-btn:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+/* --- TABS (Style Quizlet Épuré) --- */
 .tabs {
-    display: flex; gap: 10px; margin-bottom: 20px;
-    background: #f8f9fa; padding: 5px; border-radius: 12px;
+    display: flex; 
+    gap: 15px; 
+    margin-bottom: 30px;
+    background: none; /* On enlève le fond gris */
+    padding: 0;
+    border-bottom: 3px solid var(--primary-light); /* Ligne de fond */
 }
 
 .tab-btn {
-    flex: 1; padding: 10px; border: none; background: none;
-    cursor: pointer; border-radius: 8px; font-weight: 600; color: #666;
+    flex: none; /* Ne prend pas toute la largeur */
+    padding: 12px 25px; 
+    border: none; 
+    background: none;
+    cursor: pointer; 
+    border-radius: 0; /* Pas de coins arrondis */
+    font-weight: 700; 
+    font-size: 1.1rem;
+    color: #888;
+    border-bottom: 4px solid transparent; /* Ligne sous le bouton */
+    transition: all 0.3s;
 }
 
 .tab-btn.active {
-    background: var(--primary); color: white;
+    background: none; /* Pas de fond coloré */
+    color: var(--primary-dark);
+    border-bottom-color: var(--primary); /* La ligne devient rose */
 }
 
 .tab-content { display: none; }
 .tab-content.active { display: block; }
 
-/* --- FLASHCARDS --- */
+/* --- FLASHCARDS (Grand Format Quizlet) --- */
 .flashcard {
-    height: 150px; perspective: 1000px; margin-bottom: 15px; cursor: pointer;
+    width: 100%;
+    max-width: 800px; /* Grande carte centrée */
+    height: 400px; /* Beaucoup plus grande pour l'effet focus */
+    perspective: 1000px; 
+    margin: 40px auto; /* Centrée avec de l'espace autour */
+    cursor: pointer;
 }
-.flashcard-inner {
-    position: relative; width: 100%; height: 100%;
-    transition: transform 0.6s; transform-style: preserve-3d;
-}
-.flashcard.flipped .flashcard-inner { transform: rotateY(180deg); }
-.flashcard-front, .flashcard-back {
-    position: absolute; width: 100%; height: 100%;
-    backface-visibility: hidden; display: flex; align-items: center;
-    justify-content: center; padding: 20px; border-radius: 15px; text-align: center;
-}
-.flashcard-front { background: #eef2ff; color: var(--primary); border: 2px solid var(--primary); }
-.flashcard-back { background: var(--primary); color: white; transform: rotateY(180deg); }
 
-/* --- QUIZ --- */
-.quiz-card { background: #fff; border: 2px solid #eee; padding: 20px; border-radius: 15px; }
-.options { display: flex; flex-direction: column; gap: 10px; margin: 15px 0; }
-.opt {
-    padding: 12px; border: 2px solid #eee; border-radius: 10px;
-    background: white; cursor: pointer; text-align: left; font-family: inherit;
+.flashcard-inner {
+    position: relative; 
+    width: 100%; 
+    height: 100%;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); /* Animation plus fluide */
+    transform-style: preserve-3d;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    border-radius: 25px;
 }
-.opt.correct { background: #d1fae5; border-color: #10b981; color: #065f46; }
-.opt.wrong { background: #fee2e2; border-color: #ef4444; color: #991b1b; }
+
+.flashcard.flipped .flashcard-inner { transform: rotateY(180deg); }
+
+.flashcard-front, .flashcard-back {
+    position: absolute; 
+    width: 100%; 
+    height: 100%;
+    backface-visibility: hidden; 
+    display: flex; 
+    flex-direction: column;
+    align-items: center;
+    justify-content: center; 
+    padding: 50px; /* Plus d'espace pour le texte */
+    border-radius: 25px; 
+    text-align: center;
+    font-size: 1.8rem; /* Texte bien gros */
+    font-weight: 600;
+}
+
+/* Style de la carte recto */
+.flashcard-front { 
+    background: white; 
+    color: var(--text); 
+    border: 3px solid var(--primary-light); 
+}
+
+.flashcard-front small {
+    font-size: 1rem;
+    color: var(--primary);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 20px;
+}
+
+/* Style de la carte verso (Pailletée !) */
+.flashcard-back { 
+    background: var(--primary); 
+    background-image: var(--glitter); /* Paillettes au verso */
+    color: white; 
+    transform: rotateY(180deg); 
+    border: 3px solid var(--primary-dark);
+}
+
+.flashcard-back hr {
+    width: 50%;
+    border: 1px solid rgba(255,255,255,0.3);
+    margin: 20px 0;
+}
+
+/* --- QUIZ (Épuré et Focus) --- */
+.quiz-card { 
+    background: #fff; 
+    border: 2px solid var(--primary-light); 
+    padding: 30px; 
+    border-radius: 20px;
+    margin-bottom: 20px;
+}
+
+.quiz-card h3 {
+    color: var(--primary-dark);
+    margin-bottom: 15px;
+    font-size: 1.3rem;
+}
+
+.quiz-card p {
+    font-size: 1.2rem;
+    font-weight: 500;
+    margin-bottom: 20px;
+}
+
+.options { 
+    display: flex; 
+    flex-direction: column; 
+    gap: 15px; /* Plus d'espace entre les options */
+    margin: 20px 0; 
+}
+
+/* Boutons d'option larges type Quizlet */
+.opt {
+    padding: 18px 25px; 
+    border: 2px solid #edeff4; 
+    border-radius: 12px;
+    background: white; 
+    cursor: pointer; 
+    text-align: left; 
+    font-family: inherit;
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--text);
+    transition: all 0.2s ease;
+}
+
+.opt:hover {
+    border-color: var(--primary-light);
+    background-color: #fffaff;
+}
+
+.opt.correct { 
+    background: #d1fae5 !important; /* Vert pâle */
+    border-color: #10b981; 
+    color: #065f46; 
+    font-weight: 700;
+}
+
+.opt.wrong { 
+    background: #fee2e2 !important; /* Rouge pâle */
+    border-color: #ef4444; 
+    color: #991b1b; 
+    font-weight: 700;
+}
+
+/* Désactivation propre après réponse */
+.opt:disabled {
+    cursor: not-allowed;
+    opacity: 0.8;
+}
+.opt:disabled:not(.correct):not(.wrong) {
+    border-color: #eee;
+    color: #aaa;
+}
+
+/* Bouton "Suivant" discret */
 .next-btn { 
-    margin-top: 15px; width: 100%; padding: 10px; 
-    background: #333; color: white; border-radius: 8px; border: none; cursor: pointer;
+    margin-top: 20px; 
+    width: 100%; 
+    padding: 15px; 
+    background: #333; 
+    color: white; 
+    border-radius: 12px; 
+    border: none; 
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 1.1rem;
+    transition: background 0.3s;
+}
+
+.next-btn:hover {
+    background: #555;
+}
+
+/* --- RÉSUMÉ --- */
+.resume-part {
+    background: white;
+    padding: 25px;
+    border-radius: 15px;
+    margin-bottom: 20px;
+    border: 2px solid var(--primary-light);
+}
+
+.resume-part h3 {
+    color: var(--primary-dark);
+    margin-bottom: 10px;
+}
+
+.resume-part ul {
+    margin-left: 20px;
+    margin-top: 10px;
+    color: #555;
 }
