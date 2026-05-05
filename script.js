@@ -12,20 +12,26 @@ window.addEventListener("DOMContentLoaded", () => {
     };
 
     // ===============================
+    // PROTECTION DOM
+    // ===============================
+    if (!elements.courseText || !elements.generateBtn || !elements.summary || !elements.flashcards || !elements.quiz) {
+        console.error("❌ Éléments HTML manquants");
+        return;
+    }
+
+    // ===============================
     // COMPTEUR
     // ===============================
-    if (elements.courseText && elements.charCount) {
-        elements.courseText.addEventListener("input", () => {
-            const length = elements.courseText.value.length;
-            elements.charCount.innerText = `${length} / ${maxChars}`;
-            elements.charCount.style.color = length > maxChars ? "red" : "black";
-        });
-    }
+    elements.courseText.addEventListener("input", () => {
+        const length = elements.courseText.value.length;
+        elements.charCount.innerText = `${length} / ${maxChars}`;
+        elements.charCount.style.color = length > maxChars ? "red" : "black";
+    });
 
     // ===============================
     // GENERATION
     // ===============================
-    elements.generateBtn?.addEventListener('click', async () => {
+    elements.generateBtn.addEventListener('click', async () => {
 
         const content = elements.courseText.value.trim();
 
@@ -42,7 +48,10 @@ window.addEventListener("DOMContentLoaded", () => {
                 body: JSON.stringify({ cours: content })
             });
 
-            if (!response.ok) throw new Error();
+            if (!response.ok) {
+                const errText = await response.text();
+                throw new Error(errText);
+            }
 
             const data = await response.json();
 
@@ -51,6 +60,7 @@ window.addEventListener("DOMContentLoaded", () => {
             renderQuiz(data.quiz || []);
 
         } catch (err) {
+            console.error(err);
             alert("⚠️ Erreur serveur");
         } finally {
             elements.generateBtn.disabled = false;
@@ -74,20 +84,30 @@ window.addEventListener("DOMContentLoaded", () => {
             const div = document.createElement("div");
             div.className = "resume-part";
 
-            div.innerHTML = `
-                <h3>${part.titre}</h3>
-                <p>${part.resume}</p>
-                <ul>
-                    ${(part.points_cles || []).map(p => `<li>${p}</li>`).join("")}
-                </ul>
-            `;
+            const h3 = document.createElement("h3");
+            h3.textContent = part.titre || "Sans titre";
+
+            const p = document.createElement("p");
+            p.textContent = part.resume || "";
+
+            const ul = document.createElement("ul");
+
+            (part.points_cles || []).forEach(point => {
+                const li = document.createElement("li");
+                li.textContent = point;
+                ul.appendChild(li);
+            });
+
+            div.appendChild(h3);
+            div.appendChild(p);
+            div.appendChild(ul);
 
             elements.summary.appendChild(div);
         });
     }
 
     // ===============================
-    // FLASHCARDS (OK)
+    // FLASHCARDS
     // ===============================
     function renderFlashcards(cards) {
 
@@ -100,17 +120,15 @@ window.addEventListener("DOMContentLoaded", () => {
 
             div.innerHTML = `
                 <div class="flashcard-inner">
-
                     <div class="flashcard-front">
                         <small>🧠 QUESTION</small>
-                        <p><strong>${card.question}</strong></p>
+                        <p><strong>${card.question || ""}</strong></p>
                     </div>
 
                     <div class="flashcard-back">
                         <small>📘 RÉPONSE</small>
-                        <p>${card.reponse}</p>
+                        <p>${card.reponse || ""}</p>
                     </div>
-
                 </div>
             `;
 
@@ -123,7 +141,7 @@ window.addEventListener("DOMContentLoaded", () => {
     }
 
     // ===============================
-    // QUIZ FIX + SCORE + ERREURS
+    // QUIZ FIX + STABLE VERSION
     // ===============================
     function renderQuiz(questions) {
 
@@ -132,40 +150,43 @@ window.addEventListener("DOMContentLoaded", () => {
         let score = 0;
         let index = 0;
         let wrong = [];
+        let currentQuestions = questions;
 
         const normalize = (str) =>
-            str?.toLowerCase().replace(/\s+/g, "").trim();
+            (str || "").toLowerCase().replace(/\s+/g, "");
 
         function show() {
 
-            const list = index < questions.length ? questions : wrong;
+            const list = currentQuestions;
 
             if (index >= list.length) {
 
                 if (wrong.length > 0) {
-                    questions = wrong;
+                    currentQuestions = wrong;
                     wrong = [];
                     index = 0;
-                } else {
-                    elements.quiz.innerHTML = `
-                        <div style="text-align:center;padding:20px;">
-                            <h2>🏁 Quiz terminé</h2>
-                            <h3>🏆 Score : ${score} / ${questions.length}</h3>
-                        </div>
-                    `;
+                    show();
                     return;
                 }
+
+                elements.quiz.innerHTML = `
+                    <div style="text-align:center;padding:20px;">
+                        <h2>🏁 Quiz terminé</h2>
+                        <h3>🏆 Score : ${score} / ${questions.length}</h3>
+                    </div>
+                `;
+                return;
             }
 
             const q = list[index];
 
-            const correct = q.reponse_correcte;
-            const options = [...q.options].sort(() => Math.random() - 0.5);
+            const correct = q.reponse_correcte || "";
+            const options = [...(q.options || [])].sort(() => Math.random() - 0.5);
 
             elements.quiz.innerHTML = `
                 <div class="quiz-card">
                     <h3>Question ${index + 1}</h3>
-                    <p>${q.question}</p>
+                    <p>${q.question || ""}</p>
 
                     <div class="options">
                         ${options.map(o => `<button class="opt">${o}</button>`).join("")}
@@ -185,10 +206,8 @@ window.addEventListener("DOMContentLoaded", () => {
                 btn.addEventListener("click", () => {
 
                     const res = elements.quiz.querySelector(".res");
-                    const exp = elements.quiz.querySelector(".explication");
 
                     res.style.display = "block";
-                    exp.style.display = "block";
 
                     const ok = normalize(btn.innerText) === normalize(correct);
 
