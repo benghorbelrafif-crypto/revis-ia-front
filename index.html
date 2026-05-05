@@ -15,7 +15,12 @@
         </header>
 
         <section id="input-section">
-            <textarea id="course-text" placeholder="Colle ton texte ici..."></textarea>
+            <textarea 
+                id="course-text" 
+                maxlength="3000"
+                placeholder="Colle ton cours ici (max 3000 caractères)...">
+            </textarea>
+            <p id="char-count">0 / 3000</p>
             <button id="generate-btn">Générer mes révisions</button>
         </section>
 
