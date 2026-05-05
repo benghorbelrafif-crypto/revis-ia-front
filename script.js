@@ -21,11 +21,10 @@ window.addEventListener("DOMContentLoaded", () => {
     }
 
     // ===============================
-    // COMPTEUR
+    // COMPTEUR DE CARACTÈRES
     // ===============================
     elements.courseText.addEventListener("input", () => {
         const length = elements.courseText.value.length;
-
         if (elements.charCount) {
             elements.charCount.innerText = `${length} / ${maxChars}`;
             elements.charCount.style.color = length > maxChars ? "red" : "black";
@@ -33,10 +32,32 @@ window.addEventListener("DOMContentLoaded", () => {
     });
 
     // ===============================
-    // GENERATION
+    // GESTION DES ONGLETS (TABS)
+    // ===============================
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const targetTab = btn.getAttribute('data-tab');
+
+            // Désactiver tous les boutons et cacher les contenus
+            tabBtns.forEach(b => b.classList.remove('active'));
+            tabContents.forEach(c => c.classList.remove('active'));
+
+            // Activer le bouton cliqué et l'onglet correspondant
+            btn.classList.add('active');
+            const activeContent = document.getElementById(`${targetTab}-tab`);
+            if (activeContent) {
+                activeContent.classList.add('active');
+            }
+        });
+    });
+
+    // ===============================
+    // GÉNÉRATION VIA API
     // ===============================
     elements.generateBtn.addEventListener('click', async () => {
-
         const content = elements.courseText.value.trim();
 
         if (!content) return alert("Ajoute ton cours !");
@@ -60,18 +81,15 @@ window.addEventListener("DOMContentLoaded", () => {
 
             const data = await response.json();
 
-            // 🔥 AFFICHAGE + FORCE VISIBILITÉ
-            elements.summary.style.display = "block";
-            elements.flashcards.style.display = "block";
-            elements.quiz.style.display = "block";
-
+            // Affichage des données
             renderResume(data.resume);
             renderFlashcards(data.flashcards || []);
             renderQuiz(data.quiz || []);
 
         } catch (err) {
             console.error("Fetch error:", err);
-            alert("⚠️ Erreur serveur / CORS / Render bloqué");
+            // Si tu vois cette alerte, vérifie ta clé API sur Render
+            alert("⚠️ Erreur serveur / Clé API invalide sur Render");
         } finally {
             elements.generateBtn.disabled = false;
             elements.generateBtn.innerText = "Générer mes révisions";
@@ -79,12 +97,10 @@ window.addEventListener("DOMContentLoaded", () => {
     });
 
     // ===============================
-    // RESUME
+    // RENDU DU RÉSUMÉ
     // ===============================
     function renderResume(resume) {
-
         elements.summary.innerHTML = "";
-
         if (!Array.isArray(resume)) {
             elements.summary.innerText = "Résumé indisponible.";
             return;
@@ -93,102 +109,64 @@ window.addEventListener("DOMContentLoaded", () => {
         resume.forEach(part => {
             const div = document.createElement("div");
             div.className = "resume-part";
-
-            const h3 = document.createElement("h3");
-            h3.textContent = part.titre || "Sans titre";
-
-            const p = document.createElement("p");
-            p.textContent = part.resume || "";
-
-            const ul = document.createElement("ul");
-
-            (part.points_cles || []).forEach(point => {
-                const li = document.createElement("li");
-                li.textContent = point;
-                ul.appendChild(li);
-            });
-
-            div.appendChild(h3);
-            div.appendChild(p);
-            div.appendChild(ul);
-
+            div.innerHTML = `
+                <h3>${part.titre || "Sans titre"}</h3>
+                <p>${part.resume || ""}</p>
+                <ul>
+                    ${(part.points_cles || []).map(p => `<li>${p}</li>`).join('')}
+                </ul>
+            `;
             elements.summary.appendChild(div);
         });
     }
 
     // ===============================
-    // FLASHCARDS
+    // RENDU DES FLASHCARDS
     // ===============================
     function renderFlashcards(cards) {
-
         elements.flashcards.innerHTML = "";
-
-        if (!Array.isArray(cards) || cards.length === 0) {
-            elements.flashcards.innerHTML = "<p>Aucune flashcard.</p>";
+        if (cards.length === 0) {
+            elements.flashcards.innerHTML = "<p>Aucune flashcard générée.</p>";
             return;
         }
 
         cards.forEach(card => {
-
             const div = document.createElement("div");
             div.className = "flashcard";
-
             div.innerHTML = `
                 <div class="flashcard-inner">
                     <div class="flashcard-front">
                         <small>🧠 QUESTION</small>
                         <p><strong>${card.question || ""}</strong></p>
                     </div>
-
                     <div class="flashcard-back">
                         <small>📘 RÉPONSE</small>
                         <p>${card.reponse || ""}</p>
                     </div>
                 </div>
             `;
-
-            div.addEventListener("click", () => {
-                div.classList.toggle("flipped");
-            });
-
+            div.addEventListener("click", () => div.classList.toggle("flipped"));
             elements.flashcards.appendChild(div);
         });
     }
 
     // ===============================
-    // QUIZ
+    // RENDU DU QUIZ
     // ===============================
     function renderQuiz(questions) {
-
         elements.quiz.innerHTML = "";
-
-        if (!Array.isArray(questions) || questions.length === 0) {
-            elements.quiz.innerHTML = "<p>Aucune question de quiz.</p>";
+        if (questions.length === 0) {
+            elements.quiz.innerHTML = "<p>Aucun quiz généré.</p>";
             return;
         }
 
         let score = 0;
         let index = 0;
-        let wrong = [];
-        let currentQuestions = questions;
 
-        const normalize = (str) =>
-            (str || "").toLowerCase().replace(/\s+/g, "");
+        const normalize = (str) => (str || "").toLowerCase().replace(/\s+/g, "");
 
-        function show() {
-
-            const list = currentQuestions;
-
-            if (index >= list.length) {
-
-                if (wrong.length > 0) {
-                    currentQuestions = wrong;
-                    wrong = [];
-                    index = 0;
-                    show();
-                    return;
-                }
-
+        function showQuestion() {
+            if (index >= questions.length) {
                 elements.quiz.innerHTML = `
                     <div style="text-align:center;padding:20px;">
                         <h2>🏁 Quiz terminé</h2>
@@ -198,58 +176,42 @@ window.addEventListener("DOMContentLoaded", () => {
                 return;
             }
 
-            const q = list[index];
-
-            const correct = q.reponse_correcte || "";
+            const q = questions[index];
             const options = [...(q.options || [])].sort(() => Math.random() - 0.5);
 
             elements.quiz.innerHTML = `
                 <div class="quiz-card">
                     <h3>Question ${index + 1}</h3>
                     <p>${q.question || ""}</p>
-
                     <div class="options">
                         ${options.map(o => `<button class="opt">${o}</button>`).join("")}
                     </div>
-
                     <p class="res" style="display:none;"></p>
                 </div>
-
-                <div style="margin-top:10px;font-weight:bold;">
-                    Score : ${score}
-                </div>
+                <div style="margin-top:10px;font-weight:bold;">Score : ${score}</div>
             `;
 
             elements.quiz.querySelectorAll(".opt").forEach(btn => {
-
                 btn.addEventListener("click", () => {
-
                     const res = elements.quiz.querySelector(".res");
                     res.style.display = "block";
-
-                    const ok = normalize(btn.innerText) === normalize(correct);
-
-                    if (ok) {
+                    
+                    const isCorrect = normalize(btn.innerText) === normalize(q.reponse_correcte);
+                    
+                    if (isCorrect) {
                         btn.classList.add("correct");
-                        res.innerText = "✅ Bonne réponse";
+                        res.innerText = "✅ Bonne réponse !";
                         score++;
                     } else {
                         btn.classList.add("wrong");
-                        res.innerText = "❌ Faux : " + correct;
-                        wrong.push(q);
+                        res.innerText = `❌ Faux : ${q.reponse_correcte}`;
                     }
 
-                    elements.quiz.querySelectorAll(".opt")
-                        .forEach(b => b.disabled = true);
-
-                    setTimeout(() => {
-                        index++;
-                        show();
-                    }, 700);
+                    elements.quiz.querySelectorAll(".opt").forEach(b => b.disabled = true);
+                    setTimeout(() => { index++; showQuestion(); }, 1200);
                 });
             });
         }
-
-        show();
+        showQuestion();
     }
 });
