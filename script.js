@@ -1,7 +1,6 @@
 window.addEventListener("DOMContentLoaded", () => {
 
     const maxChars = 3000;
-
     const API_URL = "https://revis-ia-back.onrender.com/generer";
 
     const elements = {
@@ -26,12 +25,15 @@ window.addEventListener("DOMContentLoaded", () => {
     // ===============================
     elements.courseText.addEventListener("input", () => {
         const length = elements.courseText.value.length;
-        elements.charCount.innerText = `${length} / ${maxChars}`;
-        elements.charCount.style.color = length > maxChars ? "red" : "black";
+
+        if (elements.charCount) {
+            elements.charCount.innerText = `${length} / ${maxChars}`;
+            elements.charCount.style.color = length > maxChars ? "red" : "black";
+        }
     });
 
     // ===============================
-    // GENERATION (avec gestion 403 propre)
+    // GENERATION
     // ===============================
     elements.generateBtn.addEventListener('click', async () => {
 
@@ -46,13 +48,10 @@ window.addEventListener("DOMContentLoaded", () => {
         try {
             const response = await fetch(API_URL, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ cours: content })
             });
 
-            // 🔥 DEBUG IMPORTANT POUR TON ERREUR 403
             if (!response.ok) {
                 const errText = await response.text();
                 console.error("API ERROR:", response.status, errText);
@@ -61,13 +60,18 @@ window.addEventListener("DOMContentLoaded", () => {
 
             const data = await response.json();
 
+            // 🔥 AFFICHAGE + FORCE VISIBILITÉ
+            elements.summary.style.display = "block";
+            elements.flashcards.style.display = "block";
+            elements.quiz.style.display = "block";
+
             renderResume(data.resume);
             renderFlashcards(data.flashcards || []);
             renderQuiz(data.quiz || []);
 
         } catch (err) {
             console.error("Fetch error:", err);
-            alert("⚠️ Erreur serveur (ou CORS / Render bloqué)");
+            alert("⚠️ Erreur serveur / CORS / Render bloqué");
         } finally {
             elements.generateBtn.disabled = false;
             elements.generateBtn.innerText = "Générer mes révisions";
@@ -119,6 +123,11 @@ window.addEventListener("DOMContentLoaded", () => {
 
         elements.flashcards.innerHTML = "";
 
+        if (!Array.isArray(cards) || cards.length === 0) {
+            elements.flashcards.innerHTML = "<p>Aucune flashcard.</p>";
+            return;
+        }
+
         cards.forEach(card => {
 
             const div = document.createElement("div");
@@ -147,11 +156,16 @@ window.addEventListener("DOMContentLoaded", () => {
     }
 
     // ===============================
-    // QUIZ STABLE (CORRIGÉ)
+    // QUIZ
     // ===============================
     function renderQuiz(questions) {
 
         elements.quiz.innerHTML = "";
+
+        if (!Array.isArray(questions) || questions.length === 0) {
+            elements.quiz.innerHTML = "<p>Aucune question de quiz.</p>";
+            return;
+        }
 
         let score = 0;
         let index = 0;
