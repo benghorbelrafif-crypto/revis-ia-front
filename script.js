@@ -1,5 +1,8 @@
 window.addEventListener("DOMContentLoaded", () => {
 
+    // ===============================
+    // CONFIG ELEMENTS
+    // ===============================
     const maxChars = 3000;
 
     const elements = {
@@ -33,13 +36,18 @@ window.addEventListener("DOMContentLoaded", () => {
     });
 
     // ===============================
-    // COMPTEUR CARACTÈRES
+    // COMPTEUR DE CARACTÈRES
     // ===============================
     if (elements.courseText && elements.charCount) {
         elements.courseText.addEventListener("input", () => {
             const length = elements.courseText.value.length;
             elements.charCount.innerText = `${length} / ${maxChars}`;
-            elements.charCount.style.color = length > maxChars ? "red" : "black";
+
+            if (length > maxChars) {
+                elements.charCount.style.color = "red";
+            } else {
+                elements.charCount.style.color = "black";
+            }
         });
     }
 
@@ -63,7 +71,7 @@ window.addEventListener("DOMContentLoaded", () => {
                 body: JSON.stringify({ cours: content })
             });
 
-            if (!response.ok) throw new Error();
+            if (!response.ok) throw new Error("Erreur serveur");
 
             const data = await response.json();
 
@@ -72,8 +80,7 @@ window.addEventListener("DOMContentLoaded", () => {
             renderQuiz(data.quiz || []);
 
         } catch (err) {
-            // Si cette alerte s'affiche, vérifie ta clé API sur Render
-            alert("⚠️ Erreur serveur Render ! Vérifie ta clé API.");
+            alert("⚠️ Erreur serveur Render !");
         } finally {
             elements.generateBtn.disabled = false;
             elements.generateBtn.innerText = "Générer mes révisions";
@@ -111,9 +118,11 @@ window.addEventListener("DOMContentLoaded", () => {
     // ===============================
     function renderFlashcards(cards) {
         elements.flashcards.innerHTML = "";
+
         cards.forEach(card => {
             const div = document.createElement("div");
             div.className = "flashcard";
+
             div.innerHTML = `
                 <div class="flashcard-inner">
                     <div class="flashcard-front">
@@ -128,18 +137,19 @@ window.addEventListener("DOMContentLoaded", () => {
                     </div>
                 </div>
             `;
-            div.onclick = () => div.classList.toggle("flipped");
+            div.addEventListener("click", () => {
+                div.classList.toggle("flipped");
+            });
+
             elements.flashcards.appendChild(div);
         });
     }
 
     // ===============================
-    // QUIZ + SCORE
+    // QUIZ
     // ===============================
     function renderQuiz(questions) {
         elements.quiz.innerHTML = "";
-        let score = 0;
-        let total = questions.length;
 
         const normalize = (str) =>
             str?.toLowerCase().replace(/\s+/g, "").trim();
@@ -172,23 +182,18 @@ window.addEventListener("DOMContentLoaded", () => {
                     if (normalize(btn.innerText) === normalize(correct)) {
                         btn.classList.add("correct");
                         res.innerText = "✅ Bonne réponse";
-                        score++;
+                        exp.innerText = q.explication || "";
                     } else {
                         btn.classList.add("wrong");
                         res.innerText = "❌ Faux. Réponse : " + correct;
+                        exp.innerText = q.explication || "";
                     }
-                    exp.innerText = q.explication || "";
+
                     div.querySelectorAll('.opt').forEach(b => b.disabled = true);
-                    document.getElementById("quiz-score").innerHTML = `🏆 Score : ${score} / ${total}`;
                 };
             });
+
             elements.quiz.appendChild(div);
         });
-
-        const scoreDiv = document.createElement("div");
-        scoreDiv.id = "quiz-score";
-        scoreDiv.style = "margin-bottom:15px;font-weight:bold;font-size:18px;";
-        scoreDiv.innerHTML = `🏆 Score : 0 / ${total}`;
-        elements.quiz.prepend(scoreDiv);
     }
 });
