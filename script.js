@@ -12,7 +12,7 @@ window.addEventListener("DOMContentLoaded", () => {
     };
 
     // ===============================
-    // COMPTEUR CARACTÈRES
+    // COMPTEUR
     // ===============================
     if (elements.courseText && elements.charCount) {
         elements.courseText.addEventListener("input", () => {
@@ -23,17 +23,17 @@ window.addEventListener("DOMContentLoaded", () => {
     }
 
     // ===============================
-    // GENERATION IA
+    // GENERATION
     // ===============================
     elements.generateBtn?.addEventListener('click', async () => {
 
         const content = elements.courseText.value.trim();
 
         if (!content) return alert("Ajoute ton cours !");
-        if (content.length > maxChars) return alert("⚠️ Texte trop long (max 3000)");
+        if (content.length > maxChars) return alert("Texte trop long");
 
         elements.generateBtn.disabled = true;
-        elements.generateBtn.innerText = "⏳ L'IA travaille...";
+        elements.generateBtn.innerText = "⏳ IA...";
 
         try {
             const response = await fetch('https://revis-ia-back.onrender.com/generer', {
@@ -51,7 +51,7 @@ window.addEventListener("DOMContentLoaded", () => {
             renderQuiz(data.quiz || []);
 
         } catch (err) {
-            alert("⚠️ Erreur serveur Render !");
+            alert("⚠️ Erreur serveur");
         } finally {
             elements.generateBtn.disabled = false;
             elements.generateBtn.innerText = "Générer mes révisions";
@@ -87,7 +87,7 @@ window.addEventListener("DOMContentLoaded", () => {
     }
 
     // ===============================
-    // FLASHCARDS
+    // FLASHCARDS (OK)
     // ===============================
     function renderFlashcards(cards) {
 
@@ -108,115 +108,111 @@ window.addEventListener("DOMContentLoaded", () => {
 
                     <div class="flashcard-back">
                         <small>📘 RÉPONSE</small>
-                        <p style="opacity:0.8;">❓ ${card.question}</p>
-                        <hr>
                         <p>${card.reponse}</p>
                     </div>
 
                 </div>
             `;
 
-            div.onclick = () => div.classList.toggle("flipped");
+            div.addEventListener("click", () => {
+                div.classList.toggle("flipped");
+            });
 
             elements.flashcards.appendChild(div);
         });
     }
 
     // ===============================
-    // QUIZ AVEC SCORE + REPRISE ERREURS
+    // QUIZ FIX + SCORE + ERREURS
     // ===============================
     function renderQuiz(questions) {
 
         elements.quiz.innerHTML = "";
 
         let score = 0;
-        let total = questions.length;
-
-        let currentIndex = 0;
-        let wrongQuestions = [];
+        let index = 0;
+        let wrong = [];
 
         const normalize = (str) =>
             str?.toLowerCase().replace(/\s+/g, "").trim();
 
-        function showQuestion(list) {
+        function show() {
 
-            if (currentIndex >= list.length) {
+            const list = index < questions.length ? questions : wrong;
 
-                if (wrongQuestions.length > 0) {
-                    list = wrongQuestions;
-                    wrongQuestions = [];
-                    currentIndex = 0;
+            if (index >= list.length) {
+
+                if (wrong.length > 0) {
+                    questions = wrong;
+                    wrong = [];
+                    index = 0;
                 } else {
                     elements.quiz.innerHTML = `
                         <div style="text-align:center;padding:20px;">
-                            <h2>🏁 Quiz terminé !</h2>
-                            <h3>🏆 Score final : ${score} / ${total}</h3>
-                            <p>${score === total ? "🔥 Parfait !" : "📚 Revois les erreurs pour progresser !"}</p>
+                            <h2>🏁 Quiz terminé</h2>
+                            <h3>🏆 Score : ${score} / ${questions.length}</h3>
                         </div>
                     `;
                     return;
                 }
             }
 
-            const q = list[currentIndex];
+            const q = list[index];
 
-            const correct = String(q.reponse_correcte || "").trim();
-            const shuffled = [...(q.options || [])].sort(() => Math.random() - 0.5);
+            const correct = q.reponse_correcte;
+            const options = [...q.options].sort(() => Math.random() - 0.5);
 
             elements.quiz.innerHTML = `
                 <div class="quiz-card">
-
-                    <h3>Question ${currentIndex + 1}</h3>
+                    <h3>Question ${index + 1}</h3>
                     <p>${q.question}</p>
 
                     <div class="options">
-                        ${shuffled.map(opt => `<button class="opt">${opt}</button>`).join("")}
+                        ${options.map(o => `<button class="opt">${o}</button>`).join("")}
                     </div>
 
-                    <p class="res" style="display:none; margin-top:10px; font-weight:bold;"></p>
-                    <small class="explication" style="display:none; color:gray;"></small>
+                    <p class="res" style="display:none;"></p>
+                    <small class="explication" style="display:none;"></small>
                 </div>
 
-                <div style="margin-top:15px;font-weight:bold;">
-                    🏆 Score : ${score} / ${total}
+                <div style="margin-top:10px;font-weight:bold;">
+                    Score : ${score}
                 </div>
             `;
 
-            document.querySelectorAll('.opt').forEach(btn => {
-                btn.onclick = () => {
+            elements.quiz.querySelectorAll(".opt").forEach(btn => {
 
-                    const res = document.querySelector('.res');
-                    const exp = document.querySelector('.explication');
+                btn.addEventListener("click", () => {
+
+                    const res = elements.quiz.querySelector(".res");
+                    const exp = elements.quiz.querySelector(".explication");
 
                     res.style.display = "block";
                     exp.style.display = "block";
 
-                    const isCorrect =
-                        normalize(btn.innerText) === normalize(correct);
+                    const ok = normalize(btn.innerText) === normalize(correct);
 
-                    if (isCorrect) {
+                    if (ok) {
                         btn.classList.add("correct");
                         res.innerText = "✅ Bonne réponse";
-                        exp.innerText = q.explication || "";
                         score++;
                     } else {
                         btn.classList.add("wrong");
-                        res.innerText = "❌ Faux. Réponse : " + correct;
-                        exp.innerText = q.explication || "";
-                        wrongQuestions.push(q);
+                        res.innerText = "❌ Faux : " + correct;
+                        wrong.push(q);
                     }
 
-                    document.querySelectorAll('.opt').forEach(b => b.disabled = true);
+                    elements.quiz.querySelectorAll(".opt")
+                        .forEach(b => b.disabled = true);
 
                     setTimeout(() => {
-                        currentIndex++;
-                        showQuestion(list);
-                    }, 1000);
-                };
+                        index++;
+                        show();
+                    }, 800);
+                });
             });
         }
 
-        showQuestion(questions);
+        show();
     }
-
 });
