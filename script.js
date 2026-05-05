@@ -1,8 +1,5 @@
 window.addEventListener("DOMContentLoaded", () => {
 
-    // ===============================
-    // CONFIG ELEMENTS
-    // ===============================
     const maxChars = 3000;
 
     const elements = {
@@ -15,19 +12,13 @@ window.addEventListener("DOMContentLoaded", () => {
     };
 
     // ===============================
-    // COMPTEUR DE CARACTÈRES
+    // COMPTEUR CARACTÈRES
     // ===============================
     if (elements.courseText && elements.charCount) {
         elements.courseText.addEventListener("input", () => {
             const length = elements.courseText.value.length;
             elements.charCount.innerText = `${length} / ${maxChars}`;
-
-            // limite visuelle
-            if (length > maxChars) {
-                elements.charCount.style.color = "red";
-            } else {
-                elements.charCount.style.color = "black";
-            }
+            elements.charCount.style.color = length > maxChars ? "red" : "black";
         });
     }
 
@@ -51,7 +42,7 @@ window.addEventListener("DOMContentLoaded", () => {
                 body: JSON.stringify({ cours: content })
             });
 
-            if (!response.ok) throw new Error("Erreur serveur");
+            if (!response.ok) throw new Error();
 
             const data = await response.json();
 
@@ -95,7 +86,7 @@ window.addEventListener("DOMContentLoaded", () => {
     }
 
     // ===============================
-    // FLASHCARDS (RECTO = QUESTION / VERSO = REPONSE)
+    // FLASHCARDS
     // ===============================
     function renderFlashcards(cards) {
 
@@ -109,39 +100,36 @@ window.addEventListener("DOMContentLoaded", () => {
             div.innerHTML = `
                 <div class="flashcard-inner">
 
-                    <!-- RECTO -->
                     <div class="flashcard-front">
                         <small>🧠 QUESTION</small>
                         <p><strong>${card.question}</strong></p>
                     </div>
 
-                    <!-- VERSO -->
                     <div class="flashcard-back">
                         <small>📘 RÉPONSE</small>
-
                         <p style="opacity:0.8;">❓ ${card.question}</p>
                         <hr>
-
                         <p>${card.reponse}</p>
                     </div>
 
                 </div>
             `;
 
-            div.addEventListener("click", () => {
-                div.classList.toggle("flipped");
-            });
+            div.onclick = () => div.classList.toggle("flipped");
 
             elements.flashcards.appendChild(div);
         });
     }
 
     // ===============================
-    // QUIZ
+    // QUIZ + SCORE
     // ===============================
     function renderQuiz(questions) {
 
         elements.quiz.innerHTML = "";
+
+        let score = 0;
+        let total = questions.length;
 
         const normalize = (str) =>
             str?.toLowerCase().replace(/\s+/g, "").trim();
@@ -179,6 +167,7 @@ window.addEventListener("DOMContentLoaded", () => {
                         btn.classList.add("correct");
                         res.innerText = "✅ Bonne réponse";
                         exp.innerText = q.explication || "";
+                        score++;
                     } else {
                         btn.classList.add("wrong");
                         res.innerText = "❌ Faux. Réponse : " + correct;
@@ -186,11 +175,23 @@ window.addEventListener("DOMContentLoaded", () => {
                     }
 
                     div.querySelectorAll('.opt').forEach(b => b.disabled = true);
+
+                    // afficher score en direct
+                    document.getElementById("quiz-score").innerHTML =
+                        `🏆 Score : ${score} / ${total}`;
                 };
             });
 
             elements.quiz.appendChild(div);
         });
+
+        // affichage score initial
+        const scoreDiv = document.createElement("div");
+        scoreDiv.id = "quiz-score";
+        scoreDiv.style = "margin-bottom:15px;font-weight:bold;font-size:18px;";
+        scoreDiv.innerHTML = `🏆 Score : 0 / ${total}`;
+
+        elements.quiz.prepend(scoreDiv);
     }
 
 });
