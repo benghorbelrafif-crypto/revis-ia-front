@@ -23,7 +23,7 @@ window.addEventListener("DOMContentLoaded", () => {
     }
 
     // ===============================
-    // GENERATION
+    // GENERATION IA
     // ===============================
     elements.generateBtn?.addEventListener('click', async () => {
 
@@ -62,6 +62,7 @@ window.addEventListener("DOMContentLoaded", () => {
     // RESUME
     // ===============================
     function renderResume(resume) {
+
         elements.summary.innerHTML = "";
 
         if (!Array.isArray(resume)) {
@@ -122,7 +123,7 @@ window.addEventListener("DOMContentLoaded", () => {
     }
 
     // ===============================
-    // QUIZ + SCORE
+    // QUIZ AVEC SCORE + REPRISE ERREURS
     // ===============================
     function renderQuiz(questions) {
 
@@ -131,39 +132,69 @@ window.addEventListener("DOMContentLoaded", () => {
         let score = 0;
         let total = questions.length;
 
+        let currentIndex = 0;
+        let wrongQuestions = [];
+
         const normalize = (str) =>
             str?.toLowerCase().replace(/\s+/g, "").trim();
 
-        questions.forEach((q, i) => {
+        function showQuestion(list) {
+
+            if (currentIndex >= list.length) {
+
+                if (wrongQuestions.length > 0) {
+                    list = wrongQuestions;
+                    wrongQuestions = [];
+                    currentIndex = 0;
+                } else {
+                    elements.quiz.innerHTML = `
+                        <div style="text-align:center;padding:20px;">
+                            <h2>🏁 Quiz terminé !</h2>
+                            <h3>🏆 Score final : ${score} / ${total}</h3>
+                            <p>${score === total ? "🔥 Parfait !" : "📚 Revois les erreurs pour progresser !"}</p>
+                        </div>
+                    `;
+                    return;
+                }
+            }
+
+            const q = list[currentIndex];
 
             const correct = String(q.reponse_correcte || "").trim();
             const shuffled = [...(q.options || [])].sort(() => Math.random() - 0.5);
 
-            const div = document.createElement("div");
-            div.className = "quiz-card";
+            elements.quiz.innerHTML = `
+                <div class="quiz-card">
 
-            div.innerHTML = `
-                <h3>Question ${i + 1}</h3>
-                <p>${q.question}</p>
+                    <h3>Question ${currentIndex + 1}</h3>
+                    <p>${q.question}</p>
 
-                <div class="options">
-                    ${shuffled.map(opt => `<button class="opt">${opt}</button>`).join("")}
+                    <div class="options">
+                        ${shuffled.map(opt => `<button class="opt">${opt}</button>`).join("")}
+                    </div>
+
+                    <p class="res" style="display:none; margin-top:10px; font-weight:bold;"></p>
+                    <small class="explication" style="display:none; color:gray;"></small>
                 </div>
 
-                <p class="res" style="display:none; margin-top:10px; font-weight:bold;"></p>
-                <small class="explication" style="display:none; color:gray;"></small>
+                <div style="margin-top:15px;font-weight:bold;">
+                    🏆 Score : ${score} / ${total}
+                </div>
             `;
 
-            div.querySelectorAll('.opt').forEach(btn => {
+            document.querySelectorAll('.opt').forEach(btn => {
                 btn.onclick = () => {
 
-                    const res = div.querySelector('.res');
-                    const exp = div.querySelector('.explication');
+                    const res = document.querySelector('.res');
+                    const exp = document.querySelector('.explication');
 
                     res.style.display = "block";
                     exp.style.display = "block";
 
-                    if (normalize(btn.innerText) === normalize(correct)) {
+                    const isCorrect =
+                        normalize(btn.innerText) === normalize(correct);
+
+                    if (isCorrect) {
                         btn.classList.add("correct");
                         res.innerText = "✅ Bonne réponse";
                         exp.innerText = q.explication || "";
@@ -172,26 +203,20 @@ window.addEventListener("DOMContentLoaded", () => {
                         btn.classList.add("wrong");
                         res.innerText = "❌ Faux. Réponse : " + correct;
                         exp.innerText = q.explication || "";
+                        wrongQuestions.push(q);
                     }
 
-                    div.querySelectorAll('.opt').forEach(b => b.disabled = true);
+                    document.querySelectorAll('.opt').forEach(b => b.disabled = true);
 
-                    // afficher score en direct
-                    document.getElementById("quiz-score").innerHTML =
-                        `🏆 Score : ${score} / ${total}`;
+                    setTimeout(() => {
+                        currentIndex++;
+                        showQuestion(list);
+                    }, 1000);
                 };
             });
+        }
 
-            elements.quiz.appendChild(div);
-        });
-
-        // affichage score initial
-        const scoreDiv = document.createElement("div");
-        scoreDiv.id = "quiz-score";
-        scoreDiv.style = "margin-bottom:15px;font-weight:bold;font-size:18px;";
-        scoreDiv.innerHTML = `🏆 Score : 0 / ${total}`;
-
-        elements.quiz.prepend(scoreDiv);
+        showQuestion(questions);
     }
 
 });
