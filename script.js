@@ -4,9 +4,8 @@ window.addEventListener("DOMContentLoaded", () => {
     // CONFIG ELEMENTS
     // ===============================
     const maxChars = 3000;
-    let score = 0; // Variable pour le score
-    let questionsRatees = []; // Tableau pour stocker les erreurs
-    let modeRattrapage = false; // Pour savoir si on repasse les erreurs
+    let score = 0; // Pour suivre le score
+    let questionsRatees = []; // Liste des erreurs à repasser
 
     const elements = {
         courseText: document.getElementById('course-text'),
@@ -68,10 +67,9 @@ window.addEventListener("DOMContentLoaded", () => {
             if (!response.ok) throw new Error("Erreur serveur");
             const data = await response.json();
 
-            // Reset des variables de jeu lors d'une nouvelle génération
+            // Réinitialisation pour un nouveau cours
             score = 0;
             questionsRatees = [];
-            modeRattrapage = false;
 
             renderResume(data.resume);
             renderFlashcards(data.flashcards || []);
@@ -85,6 +83,9 @@ window.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+    // ===============================
+    // RESUME
+    // ===============================
     function renderResume(resume) {
         elements.summary.innerHTML = "";
         if (!Array.isArray(resume)) {
@@ -97,12 +98,17 @@ window.addEventListener("DOMContentLoaded", () => {
             div.innerHTML = `
                 <h3>${part.titre}</h3>
                 <p>${part.resume}</p>
-                <ul>${(part.points_cles || []).map(p => `<li>${p}</li>`).join("")}</ul>
+                <ul>
+                    ${(part.points_cles || []).map(p => `<li>${p}</li>`).join("")}
+                </ul>
             `;
             elements.summary.appendChild(div);
         });
     }
 
+    // ===============================
+    // FLASHCARDS
+    // ===============================
     function renderFlashcards(cards) {
         elements.flashcards.innerHTML = "";
         cards.forEach(card => {
@@ -117,7 +123,8 @@ window.addEventListener("DOMContentLoaded", () => {
                     <div class="flashcard-back">
                         <small>📘 RÉPONSE</small>
                         <p style="opacity:0.8;">❓ ${card.question}</p>
-                        <hr><p>${card.reponse}</p>
+                        <hr>
+                        <p>${card.reponse}</p>
                     </div>
                 </div>
             `;
@@ -127,14 +134,17 @@ window.addEventListener("DOMContentLoaded", () => {
     }
 
     // ===============================
-    // QUIZ (LOGIQUE MODIFIÉE)
+    // QUIZ (LOGIQUE DE RATTRAPAGE AJOUTÉE)
     // ===============================
     function renderQuiz(questions, isRetry = false) {
-        if (!isRetry) elements.quiz.innerHTML = ""; // On ne vide que si c'est le début
+        if (!isRetry) {
+            elements.quiz.innerHTML = ""; // Vide seulement au premier tour
+            score = 0;
+            questionsRatees = [];
+        }
 
         const normalize = (str) => str?.toLowerCase().replace(/\s+/g, "").trim();
-        let reponsesDonnees = 0;
-        const totalAAtteindre = questions.length;
+        let reponsesCount = 0;
 
         questions.forEach((q, i) => {
             const correct = String(q.reponse_correcte || "").trim();
@@ -142,11 +152,8 @@ window.addEventListener("DOMContentLoaded", () => {
 
             const div = document.createElement("div");
             div.className = "quiz-card";
-            // Si on est en mode rattrapage, on l'indique
-            const title = isRetry ? `Rattrapage - Erreur n°${i + 1}` : `Question ${i + 1}`;
-
             div.innerHTML = `
-                <h3>${title}</h3>
+                <h3>${isRetry ? "Rattrapage" : "Question"} ${i + 1}</h3>
                 <p>${q.question}</p>
                 <div class="options">
                     ${shuffled.map(opt => `<button class="opt">${opt}</button>`).join("")}
@@ -161,27 +168,24 @@ window.addEventListener("DOMContentLoaded", () => {
                     const exp = div.querySelector('.explication');
                     res.style.display = "block";
                     exp.style.display = "block";
-                    reponsesDonnees++;
+                    reponsesCount++;
 
                     if (normalize(btn.innerText) === normalize(correct)) {
                         btn.classList.add("correct");
-                        res.innerText = "✅ Bonne réponse !";
-                        if (!isRetry) score++; // On ne compte le score que le premier tour
+                        res.innerText = "✅ Bonne réponse";
+                        if (!isRetry) score++; // On compte le score seulement au 1er passage
                     } else {
                         btn.classList.add("wrong");
-                        res.innerText = "❌ Faux. La réponse était : " + correct;
-                        // On ajoute aux erreurs si ce n'est pas déjà dans la liste
-                        if (!questionsRatees.includes(q)) {
-                            questionsRatees.push(q);
-                        }
+                        res.innerText = "❌ Faux. Réponse : " + correct;
+                        if (!questionsRatees.includes(q)) questionsRatees.push(q);
                     }
 
                     exp.innerText = q.explication || "";
                     div.querySelectorAll('.opt').forEach(b => b.disabled = true);
 
-                    // Quand toutes les questions de la liste actuelle sont répondues
-                    if (reponsesDonnees === totalAAtteindre) {
-                        setTimeout(() => checkNextStep(questions.length), 1500);
+                    // Si c'est la dernière question du tour actuel
+                    if (reponsesCount === questions.length) {
+                        setTimeout(() => handleQuizEnd(questions.length), 1500);
                     }
                 };
             });
@@ -189,29 +193,29 @@ window.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    function checkNextStep(totalQuestionsInit) {
+    function handleQuizEnd(totalTour) {
         if (questionsRatees.length > 0) {
-            const continuer = confirm(`Tour terminé. Score : ${score}. Tu as fait ${questionsRatees.length} erreurs. On les retente ?`);
-            if (continuer) {
-                const aReposer = [...questionsRatees];
-                questionsRatees = []; // On vide pour le nouveau tour de rattrapage
-                elements.quiz.innerHTML = `<div class="info-retry">🚀 C'est parti pour le rattrapage (${aReposer.length} questions)</div>`;
-                renderQuiz(aReposer, true);
+            const confirmRetry = confirm(`Fin du tour ! Score : ${score}. Tu as fait ${questionsRatees.length} erreur(s). On les retente ?`);
+            if (confirmRetry) {
+                const aRepasser = [...questionsRatees];
+                questionsRatees = []; // On vide pour le tour suivant
+                elements.quiz.innerHTML = `<h2 style="text-align:center; color:#6366f1;">🚀 Rattrapage : On corrige tes erreurs !</h2>`;
+                renderQuiz(aRepasser, true);
             } else {
-                finirQuiz(totalQuestionsInit);
+                showFinalScore(totalTour);
             }
         } else {
-            alert("Bravo ! Tu as corrigé toutes tes erreurs.");
-            finirQuiz(totalQuestionsInit);
+            alert("Félicitations ! Tu as tout bon.");
+            showFinalScore(totalTour);
         }
     }
 
-    function finirQuiz(total) {
+    function showFinalScore(total) {
         elements.quiz.innerHTML = `
-            <div class="quiz-final">
-                <h2>Quiz terminé ! 🏁</h2>
-                <p style="font-size: 1.5rem;">Ton score final : <strong>${score} / ${total}</strong></p>
-                <button class="tab-btn active" onclick="location.reload()" style="margin-top:20px;">Recommencer tout</button>
+            <div style="text-align:center; padding:20px; background:white; border-radius:12px; box-shadow:0 4px 6px rgba(0,0,0,0.1);">
+                <h2>Quiz Terminé ! 🏁</h2>
+                <p style="font-size:1.4rem;">Score final : <strong>${score}</strong></p>
+                <button onclick="location.reload()" class="generate-btn" style="margin-top:20px; width:auto; padding:10px 20px;">Recommencer tout</button>
             </div>
         `;
     }
