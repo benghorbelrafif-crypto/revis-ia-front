@@ -1,55 +1,88 @@
-<!DOCTYPE html>
-<html lang="fr">
+<!DOCTYPE html> <!-- Déclare le type de document HTML5 -->
+<html lang="fr"> <!-- Début du document HTML avec langue française -->
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SuccessLab 🚀</title>
-    <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8"> <!-- Définit l'encodage des caractères (UTF-8 pour supporter les accents) -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Rend le site responsive (adapté aux mobiles) -->
+    <title>SuccessLab 🚀</title> <!-- Titre affiché dans l'onglet du navigateur -->
+    
+    <link rel="stylesheet" href="style.css"> <!-- Lien vers le fichier CSS pour le style -->
+    
+    <!-- Importation de la police Poppins depuis Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 </head>
-<body>
 
-    <div class="app-container">
-        <header>
-            <div class="logo-container">
+<body> <!-- Début du contenu visible de la page -->
+
+    <div class="app-container"> <!-- Conteneur principal de l'application -->
+        
+        <header> <!-- En-tête de la page -->
+            <div class="logo-container"> <!-- Conteneur du logo et du titre -->
+                
+                <!-- Logo du site -->
                 <img src="Succes lab logo.png" alt="SuccessLab Logo" class="site-logo">
+                
+                <!-- Nom du site -->
                 <h1>SuccessLab</h1> 
             </div>
         </header>
 
+        <!-- Section où l'utilisateur entre son cours -->
         <section id="input-section">
-            <div class="textarea-wrapper">
+            
+            <div class="textarea-wrapper"> <!-- Conteneur de la zone de texte -->
+                
+                <!-- Zone de saisie du texte -->
                 <textarea 
                     id="course-text" 
-                    maxlength="3000"
+                    maxlength="3000" <!-- Limite à 3000 caractères -->
                     placeholder="Colle ton cours ici (max 3000 caractères)..."></textarea>
+                
+                <!-- Compteur de caractères -->
                 <p id="char-count">0 / 3000</p>
             </div>
+            
+            <!-- Bouton pour générer les révisions -->
             <button id="generate-btn">Générer mes révisions</button>
         </section>
 
+        <!-- Barre de navigation avec onglets -->
         <div class="tabs">
+            
+            <!-- Onglet Résumé (actif par défaut) -->
             <button class="tab-btn active" data-tab="summary">Résumé</button>
+            
+            <!-- Onglet Flashcards -->
             <button class="tab-btn" data-tab="flashcards">Flashcards</button>
+            
+            <!-- Onglet Quiz -->
             <button class="tab-btn" data-tab="quiz">Quiz</button>
         </div>
 
+        <!-- Section où les résultats seront affichés -->
         <div id="result-section">
+            
+            <!-- Contenu de l'onglet Résumé -->
             <div id="summary-tab" class="tab-content active">
                 <div id="summary-display">Le résumé s'affichera ici.</div>
             </div>
 
+            <!-- Contenu de l'onglet Flashcards -->
             <div id="flashcards-tab" class="tab-content">
                 <div id="flashcards-container">Les questions s'afficheront ici.</div>
             </div>
 
+            <!-- Contenu de l'onglet Quiz -->
             <div id="quiz-tab" class="tab-content">
                 <div id="quiz-container">Le quiz s'affichera ici.</div>
             </div>
         </div>
     </div>
 
+    <!-- Librairie PDF.js pour lire des fichiers PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+    
+    <!--Ton script JavaScript principal -->
     <script src="script.js"></script>
+
 </body>
 </html>
