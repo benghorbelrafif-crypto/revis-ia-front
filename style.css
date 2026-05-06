@@ -42,15 +42,15 @@ body {
 /* Style pour le Logo devant le Titre */
 .logo-container {
     display: flex;
-    flex-direction: row; /* Aligne l'image et le texte sur la même ligne */
-    align-items: center; /* Centre verticalement le logo avec le texte */
+    flex-direction: row; 
+    align-items: center; 
     justify-content: center;
-    gap: 20px; /* Espace entre le logo et le titre */
+    gap: 20px; 
     margin-bottom: 40px;
 }
 
 .site-logo {
-    width: 80px; /* On réduit un peu la taille pour que ça s'aligne bien avec le texte */
+    width: 80px; 
     height: auto;
     filter: drop-shadow(0 0 10px rgba(255, 105, 180, 0.4));
 }
@@ -58,22 +58,43 @@ body {
 header h1 { 
     text-align: center; 
     color: var(--primary); 
-    font-size: 3rem; /* Un peu plus petit pour que tout tienne sur une ligne */
+    font-size: 3rem; 
     font-weight: 900;
     text-transform: uppercase;
     text-shadow: 2px 2px 0px white, 4px 4px 0px var(--primary-light);
 }
-/* --- INPUT --- */
+
+/* --- TEXTAREA WRAPPER & COMPTEUR --- */
+.textarea-wrapper {
+    position: relative; /* Indispensable pour placer le compteur par rapport à ce cadre */
+    width: 100%;
+    margin-bottom: 20px;
+}
+
 textarea {
     width: 100%; 
-    height: 150px;
+    height: 180px; /* Un peu plus haut pour le confort */
     padding: 20px;
+    padding-bottom: 40px; /* Espace en bas pour ne pas écrire sur le compteur */
     border: 2px solid var(--primary-light); 
     border-radius: 15px;
-    margin-bottom: 20px; 
     font-family: inherit;
     font-size: 1.1rem;
     background-color: #fffaff;
+    resize: none; /* Désactive le redimensionnement manuel pour garder le compteur bien placé */
+}
+
+#char-count {
+    position: absolute;
+    bottom: 15px;
+    right: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--primary-dark);
+    background: rgba(255, 255, 255, 0.7); /* Petit fond pour lisibilité */
+    padding: 2px 8px;
+    border-radius: 5px;
+    pointer-events: none; /* Empêche de bloquer le clic sur le textarea */
 }
 
 button#generate-btn {
@@ -125,7 +146,7 @@ button#generate-btn:hover {
 .tab-content { display: none; }
 .tab-content.active { display: block; }
 
-/* --- FLASHCARDS (QUIZLET STYLE) --- */
+/* --- FLASHCARDS --- */
 .flashcard {
     width: 100%;
     max-width: 850px;
