@@ -12,17 +12,19 @@
     <div class="app-container">
         <header>
             <div class="logo-container">
-                <h1>SuccessLab</h1> <img src="Succes lab logo.png" alt="SuccessLab Logo" class="site-logo">
+                <img src="Succes lab logo.png" alt="SuccessLab Logo" class="site-logo">
+                <h1>SuccessLab</h1> 
             </div>
         </header>
 
         <section id="input-section">
-            <textarea 
-                id="course-text" 
-                maxlength="3000"
-                placeholder="Colle ton cours ici (max 3000 caractères)...">
-            </textarea>
-            <p id="char-count">0 / 3000</p>
+            <div class="textarea-wrapper">
+                <textarea 
+                    id="course-text" 
+                    maxlength="3000"
+                    placeholder="Colle ton cours ici (max 3000 caractères)..."></textarea>
+                <p id="char-count">0 / 3000</p>
+            </div>
             <button id="generate-btn">Générer mes révisions</button>
         </section>
 
