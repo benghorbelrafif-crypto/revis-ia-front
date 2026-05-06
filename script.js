@@ -142,70 +142,65 @@ window.addEventListener("DOMContentLoaded", () => { // Attend que toute la page 
 
     // QUIZ 
     function renderQuiz(questions, isRetry = false) {
-        if (!isRetry) {
-            elements.quiz.innerHTML = ""; // Vide seulement au premier tour
-            score = 0; // Reset score
-            questionsRatees = []; // Reset erreurs
-        }
-
-        const normalize = (str) => str?.toLowerCase().replace(/\s+/g, "").trim(); // Normalise texte
-        let reponsesCount = 0; // Compteur de réponses
-
-        questions.forEach((q, i) => { // Pour chaque question
-            const correct = String(q.reponse_correcte || "").trim(); // Bonne réponse
-
-            // Mélange les options
-            const shuffled = [...(q.options || [])].sort(() => Math.random() - 0.5);
-
-            const div = document.createElement("div"); // Carte question
-            div.className = "quiz-card";
-
-            // HTML de la question
-            div.innerHTML = `
-                <h3>${isRetry ? "Rattrapage" : "Question"} ${i + 1}</h3>
-                <p>${q.question}</p>
-                <div class="options">
-                    ${shuffled.map(opt => `<button class="opt">${opt}</button>`).join("")}
-                </div>
-                <p class="res" style="display:none; margin-top:10px; font-weight:bold;"></p>
-                <small class="explication" style="display:none; color:gray;"></small>
-            `;
-
-            // Gestion des réponses
-            div.querySelectorAll('.opt').forEach(btn => {
-                btn.onclick = () => {
-                    const res = div.querySelector('.res'); // Zone résultat
-                    const exp = div.querySelector('.explication'); // Zone explication
-
-                    res.style.display = "block";
-                    exp.style.display = "block";
-                    reponsesCount++;
-
-                    if (normalize(btn.innerText) === normalize(correct)) { // Bonne réponse
-                        btn.classList.add("correct");
-                        res.innerText = "Bonne réponse";
-                        if (!isRetry) score++; // Compte score seulement au 1er passage
-                    } else { // Mauvaise réponse
-                        btn.classList.add("wrong");
-                        res.innerText = "Faux. Réponse : " + correct;
-
-                        if (!questionsRatees.includes(q)) questionsRatees.push(q); // Ajoute aux erreurs
-                    }
-
-                    exp.innerText = q.explication || ""; // Affiche explication
-
-                    div.querySelectorAll('.opt').forEach(b => b.disabled = true); // Désactive boutons
-
-                    // Si toutes les questions sont répondues
-                    if (reponsesCount === questions.length) {
-                        setTimeout(() => handleQuizEnd(questions.length), 1500);
-                    }
-                };
-            });
-
-            elements.quiz.appendChild(div); // Ajoute question au DOM
-        });
+    if (!isRetry) {
+        elements.quiz.innerHTML = ""; 
+        score = 0; 
+        questionsRatees = []; 
     }
+
+    questions.forEach((q, i) => {
+        // On récupère la bonne réponse brute
+        const correctRaw = q.reponse_correcte; 
+
+        const shuffled = [...(q.options || [])].sort(() => Math.random() - 0.5);
+        const div = document.createElement("div");
+        div.className = "quiz-card";
+
+        div.innerHTML = `
+            <h3>${isRetry ? "Rattrapage" : "Question"} ${i + 1}</h3>
+            <p>${q.question}</p>
+            <div class="options">
+                ${shuffled.map(opt => `<button class="opt">${opt}</button>`).join("")}
+            </div>
+            <p class="res" style="display:none; margin-top:10px; font-weight:bold;"></p>
+            <small class="explication" style="display:none; color:gray;"></small>
+        `;
+
+        div.querySelectorAll('.opt').forEach(btn => {
+            btn.onclick = () => {
+                const res = div.querySelector('.res');
+                const exp = div.querySelector('.explication');
+                const userChoice = btn.innerText; // Ce que l'utilisateur a cliqué
+
+                res.style.display = "block";
+                exp.style.display = "block";
+                reponsesCount++;
+
+                // COMPARAISON CORRIGÉE
+                if (normalize(userChoice) === normalize(correctRaw)) {
+                    btn.classList.add("correct");
+                    res.innerText = "✅ Bonne réponse !";
+                    res.style.color = "#10b981"; // Vert Barbie Success
+                    if (!isRetry) score++;
+                } else {
+                    btn.classList.add("wrong");
+                    res.innerText = "❌ Faux. La réponse était : " + correctRaw;
+                    res.style.color = "#ef4444"; // Rouge erreur
+                    if (!questionsRatees.includes(q)) questionsRatees.push(q);
+                }
+
+                exp.innerText = q.explication || "";
+                div.querySelectorAll('.opt').forEach(b => b.disabled = true);
+
+                if (reponsesCount === questions.length) {
+                    setTimeout(() => handleQuizEnd(questions.length), 1500);
+                }
+            };
+        });
+
+        elements.quiz.appendChild(div);
+    });
+}
 
     // Gestion fin de quiz
     function handleQuizEnd(totalTour) {
