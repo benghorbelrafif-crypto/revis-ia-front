@@ -254,3 +254,18 @@ button#generate-btn:hover {
 }
 
 .resume-part h3 { color: var(--primary-dark); font-size: 1.5rem; margin-bottom: 15px; }
+/* Barre de défilement style Barbie */
+::-webkit-scrollbar {
+    width: 12px;
+}
+::-webkit-scrollbar-track {
+    background: var(--bg);
+}
+::-webkit-scrollbar-thumb {
+    background: var(--primary-light);
+    border-radius: 10px;
+    border: 3px solid var(--bg);
+}
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary);
+}
