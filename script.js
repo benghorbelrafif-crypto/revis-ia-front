@@ -52,10 +52,10 @@ window.addEventListener("DOMContentLoaded", () => {
     elements.generateBtn?.addEventListener('click', async () => {
         const content = elements.courseText.value.trim();
         if (!content) return alert("Ajoute ton cours !");
-        if (content.length > maxChars) return alert("⚠️ Texte trop long (max 3000)");
+        if (content.length > maxChars) return alert(" Texte trop long (max 3000)");
 
         elements.generateBtn.disabled = true;
-        elements.generateBtn.innerText = "⏳ L'IA travaille...";
+        elements.generateBtn.innerText = "Génération par SuccessLab IA...";
 
         try {
             const response = await fetch('https://revis-ia-back.onrender.com/generer', {
@@ -76,7 +76,7 @@ window.addEventListener("DOMContentLoaded", () => {
             renderQuiz(data.quiz || []);
 
         } catch (err) {
-            alert("⚠️ Erreur serveur Render !");
+            alert(" Erreur serveur Render !");
         } finally {
             elements.generateBtn.disabled = false;
             elements.generateBtn.innerText = "Générer mes révisions";
@@ -117,12 +117,12 @@ window.addEventListener("DOMContentLoaded", () => {
             div.innerHTML = `
                 <div class="flashcard-inner">
                     <div class="flashcard-front">
-                        <small>🧠 QUESTION</small>
+                        <small> QUESTION</small>
                         <p><strong>${card.question}</strong></p>
                     </div>
                     <div class="flashcard-back">
-                        <small>📘 RÉPONSE</small>
-                        <p style="opacity:0.8;">❓ ${card.question}</p>
+                        <small> RÉPONSE </small>
+                        <p style="opacity:0.8;"> ${card.question}</p>
                         <hr>
                         <p>${card.reponse}</p>
                     </div>
@@ -172,11 +172,11 @@ window.addEventListener("DOMContentLoaded", () => {
 
                     if (normalize(btn.innerText) === normalize(correct)) {
                         btn.classList.add("correct");
-                        res.innerText = "✅ Bonne réponse";
+                        res.innerText = "Bonne réponse";
                         if (!isRetry) score++; // On compte le score seulement au 1er passage
                     } else {
                         btn.classList.add("wrong");
-                        res.innerText = "❌ Faux. Réponse : " + correct;
+                        res.innerText = "Faux. Réponse : " + correct;
                         if (!questionsRatees.includes(q)) questionsRatees.push(q);
                     }
 
