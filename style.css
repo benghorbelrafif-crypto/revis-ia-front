@@ -28,6 +28,22 @@ body {
     color: var(--text);
 }
 
+/* --- BARRE DE DEFILEMENT STYLE BARBIE --- */
+::-webkit-scrollbar {
+    width: 12px;
+}
+::-webkit-scrollbar-track {
+    background: var(--bg);
+}
+::-webkit-scrollbar-thumb {
+    background: var(--primary-light);
+    border-radius: 10px;
+    border: 3px solid var(--bg);
+}
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary);
+}
+
 .app-container {
     width: 100%;
     max-width: 1000px;
@@ -39,7 +55,7 @@ body {
     border: 3px solid var(--primary-light);
 }
 
-/* Style pour le Logo devant le Titre */
+/* --- LOGO & TITRE --- */
 .logo-container {
     display: flex;
     flex-direction: row; 
@@ -66,22 +82,31 @@ header h1 {
 
 /* --- TEXTAREA WRAPPER & COMPTEUR --- */
 .textarea-wrapper {
-    position: relative; /* Indispensable pour placer le compteur par rapport à ce cadre */
+    position: relative; 
     width: 100%;
     margin-bottom: 20px;
 }
 
 textarea {
     width: 100%; 
-    height: 180px; /* Un peu plus haut pour le confort */
+    height: 180px;
     padding: 20px;
-    padding-bottom: 40px; /* Espace en bas pour ne pas écrire sur le compteur */
+    padding-bottom: 40px; 
     border: 2px solid var(--primary-light); 
     border-radius: 15px;
     font-family: inherit;
     font-size: 1.1rem;
     background-color: #fffaff;
-    resize: none; /* Désactive le redimensionnement manuel pour garder le compteur bien placé */
+    resize: none; 
+    transition: all 0.3s ease;
+}
+
+/* Effet au clic sur la zone de texte */
+textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 10px rgba(255, 105, 180, 0.2);
+    background-color: #fff;
 }
 
 #char-count {
@@ -91,12 +116,13 @@ textarea {
     font-size: 0.9rem;
     font-weight: 600;
     color: var(--primary-dark);
-    background: rgba(255, 255, 255, 0.7); /* Petit fond pour lisibilité */
+    background: rgba(255, 255, 255, 0.7);
     padding: 2px 8px;
     border-radius: 5px;
-    pointer-events: none; /* Empêche de bloquer le clic sur le textarea */
+    pointer-events: none; 
 }
 
+/* --- BUTTONS --- */
 button#generate-btn {
     width: 100%; 
     padding: 20px; 
@@ -145,6 +171,14 @@ button#generate-btn:hover {
 
 .tab-content { display: none; }
 .tab-content.active { display: block; }
+
+/* --- MESSAGES PAR DEFAUT --- */
+#summary-display, #flashcards-container, #quiz-container {
+    font-style: italic;
+    color: #aaa;
+    text-align: center;
+    padding: 20px;
+}
 
 /* --- FLASHCARDS --- */
 .flashcard {
@@ -253,19 +287,8 @@ button#generate-btn:hover {
     border: 2px solid var(--primary-light);
 }
 
-.resume-part h3 { color: var(--primary-dark); font-size: 1.5rem; margin-bottom: 15px; }
-/* Barre de défilement style Barbie */
-::-webkit-scrollbar {
-    width: 12px;
-}
-::-webkit-scrollbar-track {
-    background: var(--bg);
-}
-::-webkit-scrollbar-thumb {
-    background: var(--primary-light);
-    border-radius: 10px;
-    border: 3px solid var(--bg);
-}
-::-webkit-scrollbar-thumb:hover {
-    background: var(--primary);
+.resume-part h3 { 
+    color: var(--primary-dark); 
+    font-size: 1.5rem; 
+    margin-bottom: 15px; 
 }
