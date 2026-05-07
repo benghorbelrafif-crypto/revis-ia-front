@@ -219,4 +219,4 @@ window.addEventListener("DOMContentLoaded", () => {
             </div>
         `;
     }
-}); commente moi ce script seulement ne change rien a ce que jai fait meme si cets faux juste tu le commente ne change pas mon travaille
+});
